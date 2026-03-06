@@ -12,6 +12,11 @@
 
   <main class="app">
     <header class="hero">
+      <div class="theme-switcher" role="group" aria-label="主题模式切换">
+        <button id="theme-auto-btn" type="button" class="theme-btn" data-theme-mode="auto">自动</button>
+        <button id="theme-light-btn" type="button" class="theme-btn" data-theme-mode="light">白天</button>
+        <button id="theme-dark-btn" type="button" class="theme-btn" data-theme-mode="dark">黑夜</button>
+      </div>
       <p class="eyebrow">Web Toolkit</p>
       <h1>小工具集合</h1>
       <p class="subtitle">在一个页面中完成二维码生成与识别、哈希计算、SSH 密钥生成，以及更多常用工具操作。</p>
@@ -24,6 +29,9 @@
           <p class="nav-group-title">编码与转换</p>
           <a class="nav-link active" href="#qr" data-page="qr">二维码工具</a>
           <a class="nav-link" href="#hash" data-page="hash">哈希工具</a>
+          <a class="nav-link" href="#timestamp" data-page="timestamp">时间戳转换</a>
+          <a class="nav-link" href="#encode" data-page="encode">编码转换</a>
+          <a class="nav-link" href="#image-base64" data-page="image-base64">图片 Base64</a>
           <a class="nav-link" href="#uuid" data-page="uuid">UUID 生成</a>
           <a class="nav-link" href="#color" data-page="color">颜色转换</a>
         </div>
@@ -32,6 +40,8 @@
           <p class="nav-group-title">开发与运维</p>
           <a class="nav-link" href="#ssh" data-page="ssh">SSH 密钥</a>
           <a class="nav-link" href="#cron" data-page="cron">Cron 生成器</a>
+          <a class="nav-link" href="#diff" data-page="diff">文本差异对比</a>
+          <a class="nav-link" href="#route-trace" data-page="route-trace">网络测试</a>
           <a class="nav-link" href="#calculator" data-page="calculator">计算器</a>
         </div>
 
@@ -216,6 +226,95 @@
       </div>
     </section>
 
+    <section class="card reveal tool-page" id="timestamp-card" data-page="timestamp">
+      <h2>时间戳转换</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="timestamp-input">时间戳</label>
+          <input id="timestamp-input" type="text" placeholder="例如: 1710000000 或 1710000000000" />
+          <label for="timestamp-unit">输入单位</label>
+          <select id="timestamp-unit">
+            <option value="auto" selected>自动识别（10位秒 / 13位毫秒）</option>
+            <option value="s">秒</option>
+            <option value="ms">毫秒</option>
+          </select>
+          <button id="timestamp-to-date-btn">转为日期时间</button>
+
+          <label for="datetime-input">日期时间</label>
+          <input id="datetime-input" type="datetime-local" />
+          <button id="date-to-timestamp-btn" class="secondary">转为时间戳</button>
+        </div>
+
+        <div class="panel">
+          <label for="timestamp-output-local">本地时间</label>
+          <input id="timestamp-output-local" type="text" readonly />
+          <label for="timestamp-output-utc">UTC 时间</label>
+          <input id="timestamp-output-utc" type="text" readonly />
+          <label for="timestamp-output-seconds">秒时间戳</label>
+          <div class="inline-copy-row">
+            <input id="timestamp-output-seconds" type="text" readonly />
+            <button id="copy-timestamp-seconds-btn" class="secondary">复制</button>
+          </div>
+          <label for="timestamp-output-milliseconds">毫秒时间戳</label>
+          <div class="inline-copy-row">
+            <input id="timestamp-output-milliseconds" type="text" readonly />
+            <button id="copy-timestamp-milliseconds-btn" class="secondary">复制</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="encode-card" data-page="encode">
+      <h2>编码转换工具</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="encode-mode">转换模式</label>
+          <select id="encode-mode">
+            <option value="url-encode" selected>URL 编码</option>
+            <option value="url-decode">URL 解码</option>
+            <option value="base64-encode">Base64 编码（UTF-8）</option>
+            <option value="base64-decode">Base64 解码（UTF-8）</option>
+            <option value="unicode-escape-encode">Unicode 转义编码（\\uXXXX）</option>
+            <option value="unicode-escape-decode">Unicode 转义解码（\\uXXXX）</option>
+            <option value="html-encode">HTML 实体编码</option>
+            <option value="html-decode">HTML 实体解码</option>
+          </select>
+          <label for="encode-input">输入内容</label>
+          <textarea id="encode-input" rows="10" placeholder="输入要转换的内容"></textarea>
+          <button id="run-encode-btn">执行转换</button>
+        </div>
+
+        <div class="panel">
+          <label for="encode-output">转换结果</label>
+          <textarea id="encode-output" rows="12" readonly></textarea>
+          <button id="copy-encode-output-btn" class="secondary">复制结果</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="image-base64-card" data-page="image-base64">
+      <h2>图片 与 Base64 互转</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="image-to-base64-file">图片转 Base64</label>
+          <input id="image-to-base64-file" type="file" accept="image/*" />
+          <label for="image-base64-output">Base64（Data URL）</label>
+          <textarea id="image-base64-output" rows="8" readonly></textarea>
+          <button id="copy-image-base64-btn" class="secondary">复制 Base64</button>
+        </div>
+
+        <div class="panel">
+          <label for="base64-to-image-input">Base64 转图片（支持 Data URL 或纯 Base64）</label>
+          <textarea id="base64-to-image-input" rows="6" placeholder="粘贴 Base64 内容"></textarea>
+          <div class="button-row">
+            <button id="base64-to-image-btn">生成图片预览</button>
+            <button id="download-base64-image-btn" class="secondary">下载图片</button>
+          </div>
+          <img id="base64-image-preview" class="base64-image-preview" alt="Base64 预览图" />
+        </div>
+      </div>
+    </section>
+
     <section class="card reveal tool-page" id="color-card" data-page="color">
       <h2>颜色转换与选色卡</h2>
       <div class="grid two-col">
@@ -327,6 +426,97 @@
       </div>
     </section>
 
+    <section class="card reveal tool-page" id="diff-card" data-page="diff">
+      <h2>文本差异对比</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="diff-left">文本 A</label>
+          <textarea id="diff-left" rows="10" placeholder="左侧文本"></textarea>
+          <label for="diff-right">文本 B</label>
+          <textarea id="diff-right" rows="10" placeholder="右侧文本"></textarea>
+          <div class="button-row diff-options-row">
+            <label class="diff-toggle" for="diff-ignore-space">
+              <input id="diff-ignore-space" type="checkbox" />
+              <span class="diff-toggle-slider" aria-hidden="true"></span>
+              <span>忽略首尾空白</span>
+            </label>
+            <label class="diff-toggle" for="diff-ignore-case">
+              <input id="diff-ignore-case" type="checkbox" />
+              <span class="diff-toggle-slider" aria-hidden="true"></span>
+              <span>忽略大小写</span>
+            </label>
+          </div>
+          <button id="run-diff-btn">开始对比</button>
+        </div>
+
+        <div class="panel">
+          <label for="diff-summary">对比摘要</label>
+          <input id="diff-summary" type="text" readonly />
+          <label for="diff-output-view">差异结果（彩色）</label>
+          <div id="diff-output-view" class="diff-output-view" aria-live="polite"></div>
+          <textarea id="diff-output" rows="1" readonly hidden></textarea>
+          <button id="copy-diff-output-btn" class="secondary">复制差异结果</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="route-trace-card" data-page="route-trace">
+      <h2>网络测试（Ping / Tracert）</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="route-target-input">目标地址（域名或 URL）</label>
+          <input id="route-target-input" type="text" value="bing.com" />
+
+          <label for="ping-count-input">Ping 次数 (1-10)</label>
+          <input id="ping-count-input" type="number" min="1" max="10" value="4" />
+
+          <label for="ping-timeout-input">Ping 超时毫秒 (500-10000)</label>
+          <input id="ping-timeout-input" type="number" min="500" max="10000" value="3000" />
+
+          <div class="button-row">
+            <button id="run-ping-btn">开始 Ping</button>
+            <button id="run-tracert-btn" class="secondary">查看 Tracert 命令</button>
+          </div>
+
+          <label for="dns-type-input">DNS 记录类型</label>
+          <select id="dns-type-input">
+            <option value="A" selected>A</option>
+            <option value="AAAA">AAAA</option>
+            <option value="CNAME">CNAME</option>
+            <option value="MX">MX</option>
+            <option value="TXT">TXT</option>
+          </select>
+          <button id="run-dns-btn" class="secondary">DNS 解析检测</button>
+
+          <label for="port-list-input">端口连通性（逗号分隔）</label>
+          <input id="port-list-input" type="text" value="80,443,8080" />
+          <button id="run-port-check-btn" class="secondary">端口连通性检测</button>
+
+          <label for="http-method-input">HTTP 健康检查方法</label>
+          <select id="http-method-input">
+            <option value="HEAD" selected>HEAD</option>
+            <option value="GET">GET</option>
+          </select>
+          <button id="run-http-health-btn" class="secondary">HTTP 健康检查</button>
+
+          <div class="button-row">
+            <button id="run-cert-check-btn" class="secondary">证书到期检查</button>
+            <button id="run-public-ip-btn" class="secondary">公网 IP 与网络信息</button>
+          </div>
+
+          <p class="hint">说明：浏览器可做 HTTP/DNS/连通性检测；Tracert 跳点和完整证书链信息受浏览器安全策略限制。</p>
+        </div>
+
+        <div class="panel">
+          <label for="route-trace-summary">结果摘要</label>
+          <input id="route-trace-summary" type="text" readonly />
+          <label for="route-trace-output">输出详情</label>
+          <textarea id="route-trace-output" rows="14" readonly></textarea>
+          <button id="copy-route-trace-btn" class="secondary">复制结果</button>
+        </div>
+      </div>
+    </section>
+
     <section class="card reveal tool-page" id="input-test-card" data-page="input-test">
       <h2>键盘与鼠标测试</h2>
       <div class="grid two-col">
@@ -397,13 +587,19 @@
   <script src="vendor/jsQR.min.js"></script>
   <script src="vendor/crypto-js.min.js"></script>
   <script src="vendor/jsrsasign-all-min.js"></script>
+  <script src="modules/theme-tool.js"></script>
   <script src="modules/common.js"></script>
   <script src="modules/qr-tool.js"></script>
   <script src="modules/hash-tool.js"></script>
   <script src="modules/ssh-tool.js"></script>
   <script src="modules/cron-tool.js"></script>
   <script src="modules/uuid-tool.js"></script>
+  <script src="modules/timestamp-tool.js"></script>
+  <script src="modules/encoding-tool.js"></script>
+  <script src="modules/image-base64-tool.js"></script>
   <script src="modules/color-tool.js"></script>
+  <script src="modules/diff-tool.js"></script>
+  <script src="modules/route-trace-tool.js"></script>
   <script src="modules/calculator-tool.js"></script>
   <script src="modules/device-test-tool.js"></script>
   <script src="modules/page-nav-tool.js"></script>

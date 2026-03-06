@@ -58,6 +58,21 @@ function decodeQrData(code) {
   return normalizeMojibake(code.data);
 }
 
+function getQrPaletteByTheme() {
+  const theme = document.documentElement.getAttribute("data-theme");
+  if (theme === "dark") {
+    return {
+      colorDark: "#f3f6fb",
+      colorLight: "#141b24"
+    };
+  }
+
+  return {
+    colorDark: "#0f1115",
+    colorLight: "#ffffff"
+  };
+}
+
 function initQrTool() {
   const { clearNode, notify } = window.ToolCommon;
   const qrTextInput = document.getElementById("qr-text");
@@ -89,12 +104,13 @@ function initQrTool() {
       }
 
       const normalizedText = utf16ToUtf8(text);
+      const palette = getQrPaletteByTheme();
       new window.QRCode(qrOutput, {
         text: normalizedText,
         width: size,
         height: size,
-        colorDark: "#0f1115",
-        colorLight: "#ffffff",
+        colorDark: palette.colorDark,
+        colorLight: palette.colorLight,
         correctLevel: window.QRCode.CorrectLevel.H
       });
 
@@ -171,6 +187,18 @@ function initQrTool() {
   generateQrBtn.addEventListener("click", generateQrCode);
   downloadQrBtn.addEventListener("click", downloadQrPng);
   decodeQrBtn.addEventListener("click", decodeUploadedQr);
+
+  // Keep current QR preview consistent when switching light/dark theme.
+  const themeObserver = new MutationObserver(() => {
+    if (qrOutput.childElementCount > 0 && qrTextInput.value.trim()) {
+      generateQrCode().catch(() => {});
+    }
+  });
+
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
 }
 
 window.ToolModules = window.ToolModules || {};

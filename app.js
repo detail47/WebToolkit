@@ -1,6 +1,10 @@
 function initApp() {
   const modules = window.ToolModules || {};
 
+  if (typeof modules.initThemeTool === "function") {
+    modules.initThemeTool();
+  }
+
   if (typeof modules.initQrTool === "function") {
     modules.initQrTool();
   }
@@ -21,8 +25,28 @@ function initApp() {
     modules.initUuidTool();
   }
 
+  if (typeof modules.initTimestampTool === "function") {
+    modules.initTimestampTool();
+  }
+
+  if (typeof modules.initEncodingTool === "function") {
+    modules.initEncodingTool();
+  }
+
+  if (typeof modules.initImageBase64Tool === "function") {
+    modules.initImageBase64Tool();
+  }
+
   if (typeof modules.initColorTool === "function") {
     modules.initColorTool();
+  }
+
+  if (typeof modules.initDiffTool === "function") {
+    modules.initDiffTool();
+  }
+
+  if (typeof modules.initRouteTraceTool === "function") {
+    modules.initRouteTraceTool();
   }
 
   if (typeof modules.initCalculatorTool === "function") {
