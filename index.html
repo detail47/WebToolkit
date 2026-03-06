@@ -1,35 +1,181 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Welcome</title>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="imgs/tv.ico" type="image/x-icon">
-        <link rel="stylesheet" href="./css/login.css">
-    </head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小工具集合</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-shape bg-shape-1"></div>
+  <div class="bg-shape bg-shape-2"></div>
 
-    <body>
-        <div class="navigation">
-            <div class="links">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-            </div>
-            <h1>Login</h1>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">Web Toolkit</p>
+      <h1>小工具集合</h1>
+      <p class="subtitle">Generate QR codes, decode QR images, create file hashes, and produce SSH key pairs in one page.</p>
+    </header>
+
+    <section class="card reveal" id="qr-card">
+      <h2>QR Generator + Decoder</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="qr-text">Text or URL</label>
+          <textarea id="qr-text" rows="4" placeholder="Enter text to generate a QR code..."></textarea>
+          <label for="qr-size">Size</label>
+          <input id="qr-size" type="number" min="128" max="512" value="256" />
+          <button id="generate-qr-btn">Generate QR</button>
+          <div id="qr-output" class="qr-output" aria-live="polite"></div>
+          <button id="download-qr-btn" class="secondary" disabled>Download PNG</button>
         </div>
 
-        <form action="#" class="login-form">
-            <label for="username">用户名: </label>
-            <br>
-            <input type="text" id="username" name="username" required>
-            <br><br>
-            <label for="password">密码: </label>
-            <br>
-            <input type="password" id="password" name="password" required>
-            <br><br>
-            <button type="submit">登录</button>
+        <div class="panel">
+          <label for="qr-file">Upload QR image for decode</label>
+          <input id="qr-file" type="file" accept="image/*" />
+          <canvas id="qr-canvas" hidden></canvas>
+          <div id="decode-result" class="result-box">Decoded result will appear here.</div>
+          <button id="decode-qr-btn">Decode Uploaded QR</button>
+        </div>
+      </div>
+    </section>
 
-        </form>
-        
-    </body>
+    <section class="card reveal" id="hash-card">
+      <h2>Hash Generator</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="hash-input">Input text</label>
+          <textarea id="hash-input" rows="5" placeholder="Type any text to hash..."></textarea>
+          <label for="hash-algo">Algorithm</label>
+          <select id="hash-algo">
+            <option value="MD5">MD5</option>
+            <option value="SHA-1">SHA-1</option>
+            <option value="SHA-256" selected>SHA-256</option>
+            <option value="SHA-384">SHA-384</option>
+            <option value="SHA-512">SHA-512</option>
+          </select>
+          <button id="generate-hash-btn">Generate Hash</button>
+        </div>
+        <div class="panel">
+          <label for="hash-output">Digest</label>
+          <textarea id="hash-output" rows="6" readonly></textarea>
+          <button id="copy-hash-btn" class="secondary">Copy Hash</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal" id="ssh-card">
+      <h2>SSH Key Pair Generator</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="key-size">RSA key size</label>
+          <select id="key-size">
+            <option value="2048" selected>2048</option>
+            <option value="3072">3072</option>
+            <option value="4096">4096</option>
+          </select>
+          <label for="key-comment">Public key comment</label>
+          <input id="key-comment" type="text" value="web@local" placeholder="user@host" />
+          <button id="generate-keys-btn">Generate SSH Keys</button>
+          <p class="hint">Keys are generated in your browser using local cryptography libraries. Do not use this on shared devices for production secrets.</p>
+        </div>
+
+        <div class="panel">
+          <label for="public-key-output">Public key (OpenSSH)</label>
+          <textarea id="public-key-output" rows="5" readonly></textarea>
+          <label for="private-key-output">Private key (PKCS#8 PEM)</label>
+          <textarea id="private-key-output" rows="10" readonly></textarea>
+          <div class="button-row">
+            <button id="copy-public-key-btn" class="secondary">Copy Public</button>
+            <button id="copy-private-key-btn" class="secondary">Copy Private</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal" id="cron-card">
+      <h2>Cron 表达式生成器</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="cron-mode">表达式模式</label>
+          <select id="cron-mode">
+            <option value="5" selected>标准 Cron（5 段）</option>
+            <option value="6">Quartz（6 段：秒 分 时 日 月 周）</option>
+            <option value="7">Quartz（7 段：秒 分 时 日 月 周 年）</option>
+          </select>
+
+          <label for="cron-preset">预设场景</label>
+          <select id="cron-preset">
+            <option value="custom" selected>自定义</option>
+            <option value="every-minute">每分钟</option>
+            <option value="hourly">每小时整点</option>
+            <option value="daily-midnight">每天 00:00</option>
+            <option value="weekly-monday-9">每周一 09:00</option>
+            <option value="monthly-first-9">每月 1 日 09:00</option>
+            <option value="workday-930">工作日 09:30</option>
+          </select>
+
+          <div class="cron-grid">
+            <div id="cron-second-wrap" class="is-hidden">
+              <label for="cron-second">秒 (0-59)</label>
+              <input id="cron-second" type="text" value="0" />
+            </div>
+            <div>
+              <label for="cron-minute">分钟 (0-59)</label>
+              <input id="cron-minute" type="text" value="*" />
+            </div>
+            <div>
+              <label for="cron-hour">小时 (0-23)</label>
+              <input id="cron-hour" type="text" value="*" />
+            </div>
+            <div>
+              <label for="cron-day">日 (1-31)</label>
+              <input id="cron-day" type="text" value="*" />
+            </div>
+            <div>
+              <label for="cron-month">月 (1-12)</label>
+              <input id="cron-month" type="text" value="*" />
+            </div>
+            <div>
+              <label for="cron-weekday" id="cron-weekday-label">周 (0-6, 0=周日)</label>
+              <input id="cron-weekday" type="text" value="*" />
+            </div>
+            <div id="cron-year-wrap" class="is-hidden">
+              <label for="cron-year">年 (1970-2099)</label>
+              <input id="cron-year" type="text" value="*" />
+            </div>
+          </div>
+
+          <p class="hint">支持 `*`、`?`、`*/n`、`a-b`、`a,b,c`、单值数字。Quartz 模式建议日/周二选一使用 `?`。</p>
+          <button id="generate-cron-btn">生成 Cron</button>
+        </div>
+
+        <div class="panel">
+          <label for="cron-import">导入现有 Cron / Quartz 表达式</label>
+          <textarea id="cron-import" rows="2" placeholder="例如: 0 */5 * * * ? 或 */10 * * * *"></textarea>
+          <button id="parse-cron-btn" class="secondary">解析并回填</button>
+
+          <label for="cron-output">Cron 表达式</label>
+          <textarea id="cron-output" rows="4" readonly></textarea>
+          <label for="cron-desc">说明</label>
+          <textarea id="cron-desc" rows="3" readonly></textarea>
+          <label for="cron-next-times">未来 5 次触发时间</label>
+          <ol id="cron-next-times" class="cron-next-times" aria-live="polite"></ol>
+          <button id="copy-cron-btn" class="secondary">复制表达式</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="vendor/jsQR.min.js"></script>
+  <script src="vendor/crypto-js.min.js"></script>
+  <script src="vendor/jsrsasign-all-min.js"></script>
+  <script src="modules/common.js"></script>
+  <script src="modules/qr-tool.js"></script>
+  <script src="modules/hash-tool.js"></script>
+  <script src="modules/ssh-tool.js"></script>
+  <script src="modules/cron-tool.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
