@@ -9,7 +9,7 @@ function digestWithCryptoJs(algorithm, inputText) {
 
   const hashFn = algoMap[algorithm];
   if (!hashFn) {
-    throw new Error(`Unsupported algorithm: ${algorithm}`);
+    throw new Error(`不支持的算法：${algorithm}`);
   }
 
   return hashFn(inputText).toString(window.CryptoJS.enc.Hex);
@@ -28,7 +28,7 @@ function initHashTool() {
     const algorithm = hashAlgo.value;
 
     if (!text) {
-      notify("Please enter text to hash.");
+      notify("请输入要计算哈希的文本。");
       return;
     }
 
@@ -36,12 +36,12 @@ function initHashTool() {
       hashOutput.value = digestWithCryptoJs(algorithm, text);
     } catch (error) {
       hashOutput.value = "";
-      notify(`Hash generation failed: ${error.message}`);
+      notify(`哈希生成失败：${error.message}`);
     }
   }
 
   generateHashBtn.addEventListener("click", generateHash);
-  copyHashBtn.addEventListener("click", () => copyToClipboard(hashOutput.value, "Hash"));
+  copyHashBtn.addEventListener("click", () => copyToClipboard(hashOutput.value, "哈希值"));
 }
 
 window.ToolModules = window.ToolModules || {};

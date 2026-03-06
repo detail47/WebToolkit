@@ -100,7 +100,7 @@ function buildOpenSshPublicKeyFromRsa(pubKeyObj, comment) {
 
 function generateRsaKeyPairLocal(modulusLength) {
   if (!window.KEYUTIL) {
-    throw new Error("Local jsrsasign library is missing. Please ensure vendor/jsrsasign-all-min.js exists.");
+    throw new Error("未找到本地 jsrsasign 库，请确认 vendor/jsrsasign-all-min.js 存在。");
   }
 
   return window.KEYUTIL.generateKeypair("RSA", modulusLength);
@@ -137,15 +137,15 @@ function initSshTool() {
 
   async function generateSshKeyPair() {
     if (isGeneratingKeys) {
-      notify("SSH key generation is in progress. Please wait.");
+      notify("SSH 密钥正在生成中，请稍候。");
       return;
     }
 
     const modulusLength = Number(keySizeSelect.value);
     const comment = keyCommentInput.value.trim();
 
-    publicKeyOutput.value = "Generating...";
-    privateKeyOutput.value = "Generating...";
+    publicKeyOutput.value = "生成中...";
+    privateKeyOutput.value = "生成中...";
     isGeneratingKeys = true;
     generateKeysBtn.disabled = true;
 
@@ -169,7 +169,7 @@ function initSshTool() {
       }
 
       if (openSshPublic === lastGeneratedPublicKey) {
-        throw new Error("Repeated key detected after retries. Please refresh and try again.");
+        throw new Error("重试后仍检测到重复密钥，请刷新页面后重试。");
       }
 
       publicKeyOutput.value = openSshPublic;
@@ -178,7 +178,7 @@ function initSshTool() {
     } catch (error) {
       publicKeyOutput.value = "";
       privateKeyOutput.value = "";
-      notify(`Failed to generate SSH key pair: ${error.message}`);
+      notify(`SSH 密钥对生成失败：${error.message}`);
     } finally {
       isGeneratingKeys = false;
       generateKeysBtn.disabled = false;
@@ -186,8 +186,8 @@ function initSshTool() {
   }
 
   generateKeysBtn.addEventListener("click", generateSshKeyPair);
-  copyPublicKeyBtn.addEventListener("click", () => copyToClipboard(publicKeyOutput.value, "Public key"));
-  copyPrivateKeyBtn.addEventListener("click", () => copyToClipboard(privateKeyOutput.value, "Private key"));
+  copyPublicKeyBtn.addEventListener("click", () => copyToClipboard(publicKeyOutput.value, "公钥"));
+  copyPrivateKeyBtn.addEventListener("click", () => copyToClipboard(privateKeyOutput.value, "私钥"));
 }
 
 window.ToolModules = window.ToolModules || {};

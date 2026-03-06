@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,39 +14,66 @@
     <header class="hero">
       <p class="eyebrow">Web Toolkit</p>
       <h1>小工具集合</h1>
-      <p class="subtitle">Generate QR codes, decode QR images, create file hashes, and produce SSH key pairs in one page.</p>
+      <p class="subtitle">在一个页面中完成二维码生成与识别、哈希计算、SSH 密钥生成，以及更多常用工具操作。</p>
     </header>
 
-    <section class="card reveal" id="qr-card">
-      <h2>QR Generator + Decoder</h2>
+    <div class="workspace">
+      <aside class="sidebar card" id="sidebar-nav">
+        <h2>功能导航</h2>
+        <div class="nav-group">
+          <p class="nav-group-title">编码与转换</p>
+          <a class="nav-link active" href="#qr" data-page="qr">二维码工具</a>
+          <a class="nav-link" href="#hash" data-page="hash">哈希工具</a>
+          <a class="nav-link" href="#uuid" data-page="uuid">UUID 生成</a>
+          <a class="nav-link" href="#color" data-page="color">颜色转换</a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-title">开发与运维</p>
+          <a class="nav-link" href="#ssh" data-page="ssh">SSH 密钥</a>
+          <a class="nav-link" href="#cron" data-page="cron">Cron 生成器</a>
+          <a class="nav-link" href="#calculator" data-page="calculator">计算器</a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-title">系统与设备</p>
+          <a class="nav-link" href="#input-test" data-page="input-test">键盘鼠标测试</a>
+          <a class="nav-link" href="#media-test" data-page="media-test">音视频设备测试</a>
+        </div>
+      </aside>
+
+      <div class="pages" id="tool-pages">
+
+    <section class="card reveal tool-page active" id="qr-card" data-page="qr">
+      <h2>二维码生成与识别</h2>
       <div class="grid two-col">
         <div class="panel">
-          <label for="qr-text">Text or URL</label>
-          <textarea id="qr-text" rows="4" placeholder="Enter text to generate a QR code..."></textarea>
-          <label for="qr-size">Size</label>
+          <label for="qr-text">文本或链接</label>
+          <textarea id="qr-text" rows="4" placeholder="输入要生成二维码的内容..."></textarea>
+          <label for="qr-size">尺寸</label>
           <input id="qr-size" type="number" min="128" max="512" value="256" />
-          <button id="generate-qr-btn">Generate QR</button>
+          <button id="generate-qr-btn">生成二维码</button>
           <div id="qr-output" class="qr-output" aria-live="polite"></div>
-          <button id="download-qr-btn" class="secondary" disabled>Download PNG</button>
+          <button id="download-qr-btn" class="secondary" disabled>下载 PNG</button>
         </div>
 
         <div class="panel">
-          <label for="qr-file">Upload QR image for decode</label>
+          <label for="qr-file">上传二维码图片进行识别</label>
           <input id="qr-file" type="file" accept="image/*" />
           <canvas id="qr-canvas" hidden></canvas>
-          <div id="decode-result" class="result-box">Decoded result will appear here.</div>
-          <button id="decode-qr-btn">Decode Uploaded QR</button>
+          <div id="decode-result" class="result-box">识别结果将显示在这里。</div>
+          <button id="decode-qr-btn">识别上传二维码</button>
         </div>
       </div>
     </section>
 
-    <section class="card reveal" id="hash-card">
-      <h2>Hash Generator</h2>
+    <section class="card reveal tool-page" id="hash-card" data-page="hash">
+      <h2>哈希生成器</h2>
       <div class="grid two-col">
         <div class="panel">
-          <label for="hash-input">Input text</label>
-          <textarea id="hash-input" rows="5" placeholder="Type any text to hash..."></textarea>
-          <label for="hash-algo">Algorithm</label>
+          <label for="hash-input">输入文本</label>
+          <textarea id="hash-input" rows="5" placeholder="输入要计算哈希的文本..."></textarea>
+          <label for="hash-algo">算法</label>
           <select id="hash-algo">
             <option value="MD5">MD5</option>
             <option value="SHA-1">SHA-1</option>
@@ -54,46 +81,46 @@
             <option value="SHA-384">SHA-384</option>
             <option value="SHA-512">SHA-512</option>
           </select>
-          <button id="generate-hash-btn">Generate Hash</button>
+          <button id="generate-hash-btn">生成哈希</button>
         </div>
         <div class="panel">
-          <label for="hash-output">Digest</label>
+          <label for="hash-output">摘要结果</label>
           <textarea id="hash-output" rows="6" readonly></textarea>
-          <button id="copy-hash-btn" class="secondary">Copy Hash</button>
+          <button id="copy-hash-btn" class="secondary">复制哈希</button>
         </div>
       </div>
     </section>
 
-    <section class="card reveal" id="ssh-card">
-      <h2>SSH Key Pair Generator</h2>
+    <section class="card reveal tool-page" id="ssh-card" data-page="ssh">
+      <h2>SSH 密钥对生成器</h2>
       <div class="grid two-col">
         <div class="panel">
-          <label for="key-size">RSA key size</label>
+          <label for="key-size">RSA 密钥长度</label>
           <select id="key-size">
             <option value="2048" selected>2048</option>
             <option value="3072">3072</option>
             <option value="4096">4096</option>
           </select>
-          <label for="key-comment">Public key comment</label>
-          <input id="key-comment" type="text" value="web@local" placeholder="user@host" />
-          <button id="generate-keys-btn">Generate SSH Keys</button>
-          <p class="hint">Keys are generated in your browser using local cryptography libraries. Do not use this on shared devices for production secrets.</p>
+          <label for="key-comment">公钥注释</label>
+          <input id="key-comment" type="text" value="web@local" placeholder="用户名@主机" />
+          <button id="generate-keys-btn">生成 SSH 密钥</button>
+          <p class="hint">密钥在浏览器内使用本地加密库生成。涉及生产环境密钥时，请勿在共享设备上操作。</p>
         </div>
 
         <div class="panel">
-          <label for="public-key-output">Public key (OpenSSH)</label>
+          <label for="public-key-output">公钥 (OpenSSH)</label>
           <textarea id="public-key-output" rows="5" readonly></textarea>
-          <label for="private-key-output">Private key (PKCS#8 PEM)</label>
+          <label for="private-key-output">私钥 (PKCS#8 PEM)</label>
           <textarea id="private-key-output" rows="10" readonly></textarea>
           <div class="button-row">
-            <button id="copy-public-key-btn" class="secondary">Copy Public</button>
-            <button id="copy-private-key-btn" class="secondary">Copy Private</button>
+            <button id="copy-public-key-btn" class="secondary">复制公钥</button>
+            <button id="copy-private-key-btn" class="secondary">复制私钥</button>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="card reveal" id="cron-card">
+    <section class="card reveal tool-page" id="cron-card" data-page="cron">
       <h2>Cron 表达式生成器</h2>
       <div class="grid two-col">
         <div class="panel">
@@ -165,6 +192,205 @@
         </div>
       </div>
     </section>
+
+    <section class="card reveal tool-page" id="uuid-card" data-page="uuid">
+      <h2>UUID 生成器</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="uuid-count">生成数量 (1-20)</label>
+          <input id="uuid-count" type="number" min="1" max="20" value="1" />
+          <label for="uuid-options">格式</label>
+          <select id="uuid-options">
+            <option value="lower" selected>小写（默认）</option>
+            <option value="upper">大写</option>
+            <option value="no-hyphen">无连字符</option>
+          </select>
+          <button id="generate-uuid-btn">生成 UUID</button>
+        </div>
+
+        <div class="panel">
+          <label for="uuid-output">UUID 结果</label>
+          <textarea id="uuid-output" rows="8" readonly></textarea>
+          <button id="copy-uuid-btn" class="secondary">复制 UUID</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="color-card" data-page="color">
+      <h2>颜色转换与选色卡</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="color-input">颜色输入</label>
+          <input id="color-input" type="text" placeholder="#fff / #ffffffff / rgb(...) / rgba(...) / hsl(...) / hsla(...) / hsv(...) / cmyk(...) / red" />
+          <label for="color-picker">选色卡（整块可点击）</label>
+          <input id="color-picker" class="color-picker" type="color" value="#ff6a3d" />
+          <p class="hint">输入任意支持格式会自动转换；按 Enter 可校验输入。</p>
+          <p id="color-status" class="color-status" aria-live="polite"></p>
+        </div>
+
+        <div class="panel">
+          <div class="color-output-row">
+            <div>
+              <label for="color-hex">HEX</label>
+              <input id="color-hex" type="text" readonly />
+            </div>
+            <button id="copy-color-hex-btn" class="secondary color-copy-btn">复制</button>
+          </div>
+
+          <div class="color-output-row">
+            <div>
+              <label for="color-rgb">RGB</label>
+              <input id="color-rgb" type="text" readonly />
+            </div>
+            <button id="copy-color-rgb-btn" class="secondary color-copy-btn">复制</button>
+          </div>
+
+          <div class="color-output-row">
+            <div>
+              <label for="color-rgba">RGBA</label>
+              <input id="color-rgba" type="text" readonly />
+            </div>
+            <button id="copy-color-rgba-btn" class="secondary color-copy-btn">复制</button>
+          </div>
+
+          <div class="color-output-row">
+            <div>
+              <label for="color-hsl">HSL</label>
+              <input id="color-hsl" type="text" readonly />
+            </div>
+            <button id="copy-color-hsl-btn" class="secondary color-copy-btn">复制</button>
+          </div>
+
+          <div class="color-output-row">
+            <div>
+              <label for="color-hsv">HSV</label>
+              <input id="color-hsv" type="text" readonly />
+            </div>
+            <button id="copy-color-hsv-btn" class="secondary color-copy-btn">复制</button>
+          </div>
+
+          <div class="color-output-row">
+            <div>
+              <label for="color-cmyk">CMYK</label>
+              <input id="color-cmyk" type="text" readonly />
+            </div>
+            <button id="copy-color-cmyk-btn" class="secondary color-copy-btn">复制</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="calculator-card" data-page="calculator">
+      <h2>计算器</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="calc-expression">表达式</label>
+          <input id="calc-expression" class="calc-expression" type="text" placeholder="例如: 2(3+4)+√16+ln(2) 或 Ansln2" />
+          <div class="calc-pad" id="calc-pad">
+            <button type="button" data-action="root" class="calc-btn calc-btn-fn">√</button>
+            <button type="button" data-value="^" class="calc-btn calc-btn-op">^</button>
+            <button type="button" data-action="ln" class="calc-btn calc-btn-fn">ln</button>
+            <button type="button" data-value="(" class="calc-btn calc-btn-op">(</button>
+            <button type="button" data-value=")" class="calc-btn calc-btn-op">)</button>
+
+            <button type="button" data-value="7" class="calc-btn calc-btn-num">7</button>
+            <button type="button" data-value="8" class="calc-btn calc-btn-num">8</button>
+            <button type="button" data-value="9" class="calc-btn calc-btn-num">9</button>
+            <button type="button" data-action="backspace" class="secondary calc-btn calc-btn-ctrl">DEL</button>
+            <button type="button" data-action="clear" class="secondary calc-btn calc-btn-ctrl">AC</button>
+
+            <button type="button" data-value="4" class="calc-btn calc-btn-num">4</button>
+            <button type="button" data-value="5" class="calc-btn calc-btn-num">5</button>
+            <button type="button" data-value="6" class="calc-btn calc-btn-num">6</button>
+            <button type="button" data-value="*" class="calc-btn calc-btn-op">*</button>
+            <button type="button" data-value="/" class="calc-btn calc-btn-op">/</button>
+
+            <button type="button" data-value="1" class="calc-btn calc-btn-num">1</button>
+            <button type="button" data-value="2" class="calc-btn calc-btn-num">2</button>
+            <button type="button" data-value="3" class="calc-btn calc-btn-num">3</button>
+            <button type="button" data-value="+" class="calc-btn calc-btn-op">+</button>
+            <button type="button" data-value="-" class="calc-btn calc-btn-op">-</button>
+
+            <button type="button" data-value="0" class="calc-btn calc-btn-num">0</button>
+            <button type="button" data-value="." class="calc-btn calc-btn-num">.</button>
+            <button type="button" data-action="ans" class="calc-btn calc-btn-fn">Ans</button>
+            <button type="button" data-action="equals" class="calc-btn calc-equal calc-btn-wide">=</button>
+          </div>
+          <p class="hint">支持 `+` `-` `*` `/` `^` `√` `ln` 和括号，`Ans` 表示上次结果。支持省略乘号（如 `2(3+4)`、`2√9`），并自动补全缺失右括号。</p>
+        </div>
+
+        <div class="panel">
+          <label for="calc-result">计算结果</label>
+          <textarea id="calc-result" class="calc-result" rows="7" readonly></textarea>
+          <button id="copy-calc-btn" class="secondary">复制结果</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="input-test-card" data-page="input-test">
+      <h2>键盘与鼠标测试</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label>键盘测试</label>
+          <input id="key-test-input" type="text" placeholder="点击这里后按键，观察下方记录" />
+          <div id="key-test-log" class="result-box">按键信息将显示在这里。</div>
+        </div>
+
+        <div class="panel">
+          <label>鼠标测试区</label>
+          <div id="mouse-test-area" class="mouse-test-area">在此区域移动、点击、滚轮滚动</div>
+          <div id="mouse-test-log" class="result-box">鼠标信息将显示在这里。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="media-test-card" data-page="media-test">
+      <h2>麦克风、摄像头与扬声器测试</h2>
+      <div class="grid">
+        <div class="panel">
+          <label>摄像头与麦克风测试</label>
+          <div class="button-row">
+            <button id="start-media-test-btn">开始测试</button>
+            <button id="stop-media-test-btn" class="secondary">停止测试</button>
+            <button id="speaker-test-btn" class="secondary">扬声器测试音</button>
+          </div>
+          <p class="hint">若无法访问麦克风/摄像头，请确认浏览器权限，并尽量使用 localhost 打开页面。</p>
+
+          <div class="media-preview-grid">
+            <div class="media-column">
+              <label for="camera-preview">摄像头预览</label>
+              <video id="camera-preview" autoplay muted playsinline class="camera-preview"></video>
+            </div>
+
+            <div class="media-column">
+              <label for="camera-shot">截图预览</label>
+              <img id="camera-shot" class="camera-shot is-empty" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="截图预览" />
+              <div class="button-row">
+                <button id="capture-photo-btn" class="secondary">拍照截图</button>
+                <button id="download-photo-btn" class="secondary">下载截图</button>
+              </div>
+            </div>
+
+            <div class="media-audio-controls">
+              <label for="mic-level">麦克风音量</label>
+              <progress id="mic-level" max="100" value="0" class="mic-level"></progress>
+              <div class="button-row">
+                <button id="start-record-btn" class="secondary">开始录音</button>
+                <button id="stop-record-btn" class="secondary">停止录音</button>
+                <button id="playback-btn" class="secondary">播放录音</button>
+              </div>
+              <audio id="recorded-audio" controls class="recorded-audio"></audio>
+              <div id="media-status" class="result-box">媒体状态将显示在这里。</div>
+            </div>
+          </div>
+
+          <canvas id="camera-canvas" hidden></canvas>
+        </div>
+      </div>
+    </section>
+
+      </div>
+    </div>
   </main>
 
   <script src="vendor/qrcode.min.js"></script>
@@ -176,6 +402,11 @@
   <script src="modules/hash-tool.js"></script>
   <script src="modules/ssh-tool.js"></script>
   <script src="modules/cron-tool.js"></script>
+  <script src="modules/uuid-tool.js"></script>
+  <script src="modules/color-tool.js"></script>
+  <script src="modules/calculator-tool.js"></script>
+  <script src="modules/device-test-tool.js"></script>
+  <script src="modules/page-nav-tool.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

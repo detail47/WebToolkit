@@ -7,12 +7,19 @@
 - 哈希值生成（MD5、SHA-1、SHA-256、SHA-384、SHA-512）
 - SSH RSA 密钥对生成
 - Cron 表达式生成
+- UUID 生成
+- 颜色值转换（HEX / RGB / HSL）与选色卡
+- 计算器（加减乘除、乘方、开方）
+- 键盘鼠标测试（独立页面）
+- 麦克风/摄像头/扬声器测试（独立页面，含截图、录音与回放）
 
 ## 运行方式
 
 这是一个静态网页项目，使用现代浏览器直接打开 `index.html` 即可运行。
 
 项目支持离线使用，第三方库文件已放在 `vendor/` 目录。
+
+页面采用左侧栏导航，每个功能独立为一个子页面视图（同一 HTML 内按导航切换显示）。
 
 建议使用最新版 Chrome 或 Edge 以获得最佳兼容性。
 
@@ -26,6 +33,11 @@
 - `modules/hash-tool.js`：哈希模块
 - `modules/ssh-tool.js`：SSH 密钥模块
 - `modules/cron-tool.js`：Cron 表达式生成模块
+- `modules/uuid-tool.js`：UUID 生成模块
+- `modules/color-tool.js`：颜色转换与选色卡模块
+- `modules/calculator-tool.js`：计算器模块
+- `modules/device-test-tool.js`：设备测试模块
+- `modules/page-nav-tool.js`：侧边栏子页面导航模块
 
 ### 扩展新工具
 

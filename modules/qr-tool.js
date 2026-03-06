@@ -76,7 +76,7 @@ function initQrTool() {
     const size = Number(qrSizeInput.value) || 256;
 
     if (!text) {
-      notify("Please enter text to generate a QR code.");
+      notify("请输入要生成二维码的内容。");
       return;
     }
 
@@ -84,7 +84,7 @@ function initQrTool() {
       clearNode(qrOutput);
 
       if (!window.QRCode) {
-        notify("Local QR library is missing. Please ensure vendor/qrcode.min.js exists.");
+        notify("未找到本地二维码库，请确认 vendor/qrcode.min.js 存在。");
         return;
       }
 
@@ -100,7 +100,7 @@ function initQrTool() {
 
       downloadQrBtn.disabled = false;
     } catch (error) {
-      notify(`QR generation failed: ${error.message}`);
+      notify(`二维码生成失败：${error.message}`);
     }
   }
 
@@ -124,14 +124,14 @@ function initQrTool() {
       return;
     }
 
-    notify("No QR code to download.");
+    notify("当前没有可下载的二维码。");
   }
 
   function decodeUploadedQr() {
     const file = qrFileInput.files && qrFileInput.files[0];
 
     if (!file) {
-      notify("Please upload an image first.");
+      notify("请先上传图片。");
       return;
     }
 
@@ -152,17 +152,17 @@ function initQrTool() {
         if (code && code.data) {
           decodeResult.textContent = decodeQrData(code);
         } else {
-          decodeResult.textContent = "No QR code detected in this image.";
+          decodeResult.textContent = "未在该图片中识别到二维码。";
         }
       };
       image.onerror = () => {
-        decodeResult.textContent = "Failed to load image. Try another file.";
+        decodeResult.textContent = "图片加载失败，请尝试其他文件。";
       };
       image.src = reader.result;
     };
 
     reader.onerror = () => {
-      decodeResult.textContent = "Failed to read file. Try again.";
+      decodeResult.textContent = "文件读取失败，请重试。";
     };
 
     reader.readAsDataURL(file);

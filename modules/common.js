@@ -10,15 +10,15 @@ function clearNode(node) {
 
 async function copyToClipboard(value, label) {
   if (!value) {
-    notify(`${label} is empty.`);
+    notify(`${label}为空。`);
     return;
   }
 
   try {
     await navigator.clipboard.writeText(value);
-    notify(`${label} copied.`);
+    notify(`${label}已复制。`);
   } catch {
-    notify(`Could not copy ${label}.`);
+    notify(`无法复制${label}。`);
   }
 }
 
