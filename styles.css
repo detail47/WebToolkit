@@ -315,11 +315,62 @@ body.home-mode.sidebar-collapsed .subtitle {
   border: 1px dashed rgba(40, 45, 58, 0.24);
   border-radius: 10px;
   background: var(--surface-soft);
-  font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
-  font-size: 0.89rem;
+  font-size: 0.92rem;
   line-height: 1.45;
-  white-space: pre-wrap;
   word-break: break-word;
+}
+
+.home-readme-box h1,
+.home-readme-box h2,
+.home-readme-box h3,
+.home-readme-box h4,
+.home-readme-box h5,
+.home-readme-box h6 {
+  margin: 0.75rem 0 0.42rem;
+}
+
+.home-readme-box p,
+.home-readme-box ul,
+.home-readme-box ol,
+.home-readme-box pre,
+.home-readme-box blockquote {
+  margin: 0.48rem 0;
+}
+
+.home-readme-box ul,
+.home-readme-box ol {
+  padding-left: 1.3rem;
+}
+
+.home-readme-box code {
+  font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+  font-size: 0.88em;
+  padding: 0.1rem 0.26rem;
+  border-radius: 6px;
+  background: rgba(127, 139, 171, 0.18);
+}
+
+.home-readme-box pre {
+  padding: 0.62rem;
+  border-radius: 8px;
+  overflow: auto;
+  background: rgba(127, 139, 171, 0.14);
+}
+
+.home-readme-box pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.home-readme-box a {
+  color: var(--accent);
+}
+
+.home-readme-box blockquote {
+  margin-left: 0;
+  padding-left: 0.72rem;
+  border-left: 3px solid rgba(127, 139, 171, 0.35);
+  color: var(--muted);
 }
 
 .card {
