@@ -62,15 +62,17 @@ node dev-server.js
 
 然后访问 `http://127.0.0.1:5173`。
 
-该服务会自动返回 `COOP/COEP` 响应头，满足 `SharedArrayBuffer` 运行条件。
+本地服务同样提供双模式入口：
 
-### 部署到 Vercel（启用 ffmpeg.wasm）
+- 普通模式：`http://127.0.0.1:5173/`（不启用 COOP/COEP）
+- 隔离模式：`http://127.0.0.1:5173/isolated`（启用 COOP/COEP，满足 `SharedArrayBuffer` 条件）
 
-项目根目录已提供 `vercel.json`，会为全部静态资源返回以下响应头：
+### 部署到 Vercel（双页面模式）
 
-- `Cross-Origin-Opener-Policy: same-origin`
-- `Cross-Origin-Embedder-Policy: require-corp`
-- `Cross-Origin-Resource-Policy: same-origin`
+项目根目录已提供 `vercel.json`，将提供两个入口：
+
+- 普通模式：`/`（不启用 COOP/COEP，网络测试兼容性更好）
+- 隔离模式：`/isolated`（启用 COOP/COEP，供 `ffmpeg.wasm` 使用）
 
 部署步骤：
 
@@ -81,11 +83,15 @@ node dev-server.js
 
 验证方式（浏览器 DevTools -> Network）：
 
-- 任意页面请求响应头中应包含上面 3 个头。
-- 控制台应可看到 `crossOriginIsolated === true`。
+- 访问 `/` 时，请求头不应包含 COOP/COEP。
+- 访问 `/isolated` 时，请求头应包含：
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Embedder-Policy: require-corp`
+- `Cross-Origin-Resource-Policy: same-origin`
+- 在 `/isolated` 控制台应可看到 `crossOriginIsolated === true`。
 - 音频工具中的 `ffmpeg.wasm` 状态应为“已就绪”或“按需加载后可用”。
 
-注意：启用 `COEP: require-corp` 后，跨站资源（第三方脚本/媒体）若未正确设置 CORS 或 CORP，浏览器会拦截加载。当前项目依赖均为同源本地资源，不受影响。
+注意：`/isolated` 启用 `COEP: require-corp` 后，跨站资源（第三方脚本/媒体）若未正确设置 CORS 或 CORP，浏览器会拦截加载。当前项目依赖均为同源本地资源，不受影响。
 
 说明：部分浏览器在 `file://` 模式下会限制文件读取，欢迎页 README 可能无法加载，`ffmpeg.wasm` 也会因缺少隔离环境而不可用。若遇到该问题，请使用本地静态服务器打开。
 

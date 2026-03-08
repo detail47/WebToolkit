@@ -6,6 +6,7 @@ function initPageNavTool() {
   const homeReadmeOutput = document.querySelector("#home-readme-content");
 
   const SIDEBAR_COLLAPSE_KEY = "webtool.sidebarCollapsed";
+  const ISOLATED_ENTRY_PATH = "/isolated";
 
   function escapeHtml(text) {
     return text
@@ -238,8 +239,47 @@ function initPageNavTool() {
 
   const pageSet = new Set(pages.map((page) => page.dataset.page));
 
+  function isFileProtocol() {
+    if (window.location.protocol === "file:") {
+      return true;
+    }
+    return false;
+  }
+
+  function normalizePathname(pathname) {
+    if (!pathname || pathname === "/") {
+      return "/";
+    }
+    return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  }
+
+  function maybeSwitchEntryPath(pageKey) {
+    if (isFileProtocol()) {
+      return false;
+    }
+
+    const currentPath = normalizePathname(window.location.pathname);
+    const isIsolatedNow = currentPath === ISOLATED_ENTRY_PATH;
+    const needsIsolated = pageKey === "audio-process";
+
+    if (needsIsolated === isIsolatedNow) {
+      return false;
+    }
+
+    const nextPath = needsIsolated ? ISOLATED_ENTRY_PATH : "/";
+    const nextHash = `#${pageKey}`;
+    const nextUrl = `${nextPath}${window.location.search || ""}${nextHash}`;
+    window.location.replace(nextUrl);
+    return true;
+  }
+
   function activatePage(pageKey) {
     const target = pageSet.has(pageKey) ? pageKey : "home";
+
+    if (maybeSwitchEntryPath(target)) {
+      return;
+    }
+
     document.body.classList.toggle("home-mode", target === "home");
 
     if (typeof window.ToolModules?.ensureToolInitialized === "function") {
