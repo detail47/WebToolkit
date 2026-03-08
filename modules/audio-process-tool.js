@@ -81,6 +81,30 @@ const ffmpegRuntime = {
   statusHandler: null
 };
 
+function getFfmpegCompatibilityIssue() {
+  if (window.location.protocol === "file:") {
+    return "当前是 file:// 环境，ffmpeg.wasm 需要通过 HTTP/HTTPS 提供资源。";
+  }
+
+  if (!window.isSecureContext) {
+    return "当前不是安全上下文，ffmpeg.wasm 需要 HTTPS 或 localhost。";
+  }
+
+  if (typeof SharedArrayBuffer === "undefined") {
+    return "浏览器未提供 SharedArrayBuffer，通常需要启用 COOP/COEP 响应头。";
+  }
+
+  if (!window.crossOriginIsolated) {
+    return "当前页面未启用 crossOriginIsolated，需要服务端返回 COOP/COEP 响应头。";
+  }
+
+  return "";
+}
+
+function getFfmpegCompatibilityHelp() {
+  return "请使用本地 HTTP 服务并返回响应头：Cross-Origin-Opener-Policy: same-origin 与 Cross-Origin-Embedder-Policy: require-corp。";
+}
+
 function emitFfmpegStatus(message) {
   if (typeof ffmpegRuntime.statusHandler === "function") {
     ffmpegRuntime.statusHandler(message);
@@ -193,6 +217,13 @@ async function ensureFfmpegReady() {
     return ffmpegRuntime;
   }
 
+  const envIssue = getFfmpegCompatibilityIssue();
+  if (envIssue) {
+    const message = `${envIssue} ${getFfmpegCompatibilityHelp()}`;
+    emitFfmpegStatus(`不可用: ${envIssue}`);
+    throw new Error(`ffmpeg.wasm 不可用: ${message}`);
+  }
+
   if (ffmpegRuntime.loading) {
     emitFfmpegStatus("加载中...");
     return ffmpegRuntime.loading;
@@ -221,10 +252,7 @@ async function ensureFfmpegReady() {
     } catch (error) {
       const detail = error && error.message ? error.message : "Failed to fetch";
       emitFfmpegStatus(`加载失败: ${detail}`);
-      if (window.location.protocol === "file:") {
-        throw new Error(`ffmpeg.wasm 加载失败: ${detail}。当前是 file:// 打开，部分浏览器会拦截 wasm/worker 读取；建议改用本地 HTTP 服务。`);
-      }
-      throw new Error(`ffmpeg.wasm 加载失败: ${detail}`);
+      throw new Error(`ffmpeg.wasm 加载失败: ${detail}。${getFfmpegCompatibilityHelp()}`);
     }
     ffmpegRuntime.instance = instance;
     ffmpegRuntime.fetchFile = fetchFile;
@@ -911,7 +939,12 @@ function initAudioProcessTool() {
   }
 
   ffmpegRuntime.statusHandler = setFfmpegStatus;
-  setFfmpegStatus(ffmpegRuntime.instance ? "已就绪" : "未加载（按需）");
+  const initialFfmpegIssue = getFfmpegCompatibilityIssue();
+  setFfmpegStatus(
+    ffmpegRuntime.instance
+      ? "已就绪"
+      : (initialFfmpegIssue ? `不可用: ${initialFfmpegIssue}` : "未加载（按需）")
+  );
 
   function revokeActiveResultUrl() {
     if (activeResultUrl) {
@@ -1235,7 +1268,9 @@ function initAudioProcessTool() {
     if (encodeSupportMap[formatKey] !== undefined) {
       return encodeSupportMap[formatKey];
     }
-    const supported = Boolean(resolveSupportedEncodeMime(formatKey)) || FFMPEG_FALLBACK_FORMATS.has(formatKey);
+    const canUseFfmpeg = !getFfmpegCompatibilityIssue();
+    const supported = Boolean(resolveSupportedEncodeMime(formatKey))
+      || (FFMPEG_FALLBACK_FORMATS.has(formatKey) && canUseFfmpeg);
     encodeSupportMap[formatKey] = supported;
     return supported;
   }
@@ -1246,6 +1281,12 @@ function initAudioProcessTool() {
     }
 
     if (resolveSupportedEncodeMime(formatKey)) {
+      return;
+    }
+
+    const envIssue = getFfmpegCompatibilityIssue();
+    if (envIssue) {
+      setFfmpegStatus(`不可用: ${envIssue}`);
       return;
     }
 
@@ -1444,9 +1485,16 @@ function initAudioProcessTool() {
 
     const requestedFormatKey = resolveOutputFormat(file, options);
     const encodeMime = resolveSupportedEncodeMime(requestedFormatKey);
+    const canUseFfmpeg = !getFfmpegCompatibilityIssue();
 
     if (!encodeMime && !FFMPEG_FALLBACK_FORMATS.has(requestedFormatKey)) {
       throw new Error(`当前浏览器不支持 ${requestedFormatKey.toUpperCase()} 编码输出，请改用 WAV / WebM / Ogg。`);
+    }
+
+    if (!encodeMime && FFMPEG_FALLBACK_FORMATS.has(requestedFormatKey) && !canUseFfmpeg) {
+      throw new Error(
+        `当前环境无法使用 ffmpeg.wasm（${getFfmpegCompatibilityIssue()}），请改用 WAV / WebM / Ogg，或按要求配置服务器响应头后再导出 ${requestedFormatKey.toUpperCase()}。`
+      );
     }
 
     let blob;

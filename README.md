@@ -54,7 +54,17 @@
 
 这是静态项目，可直接打开 `index.html` 使用。
 
-说明：部分浏览器在 `file://` 模式下会限制文件读取，欢迎页 README 可能无法加载。若遇到该问题，请使用本地静态服务器打开（如 VS Code Live Server）。
+若你要使用 `ffmpeg.wasm`（音频工具中的 MP3/FLAC/AAC/M4A 转码、变速变调等），请使用项目内置本地服务：
+
+```bash
+node dev-server.js
+```
+
+然后访问 `http://127.0.0.1:5173`。
+
+该服务会自动返回 `COOP/COEP` 响应头，满足 `SharedArrayBuffer` 运行条件。
+
+说明：部分浏览器在 `file://` 模式下会限制文件读取，欢迎页 README 可能无法加载，`ffmpeg.wasm` 也会因缺少隔离环境而不可用。若遇到该问题，请使用本地静态服务器打开。
 
 建议使用最新版 Chrome 或 Edge。
 
