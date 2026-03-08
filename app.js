@@ -21,6 +21,14 @@ function initApp() {
     modules.initCronTool();
   }
 
+  if (typeof modules.initUnitConverterTool === "function") {
+    modules.initUnitConverterTool();
+  }
+
+  if (typeof modules.initPasswordTool === "function") {
+    modules.initPasswordTool();
+  }
+
   if (typeof modules.initUuidTool === "function") {
     modules.initUuidTool();
   }
@@ -29,12 +37,28 @@ function initApp() {
     modules.initTimestampTool();
   }
 
+  if (typeof modules.initTimeTools === "function") {
+    modules.initTimeTools();
+  }
+
+  if (typeof modules.initBmiTool === "function") {
+    modules.initBmiTool();
+  }
+
   if (typeof modules.initEncodingTool === "function") {
     modules.initEncodingTool();
   }
 
   if (typeof modules.initImageBase64Tool === "function") {
     modules.initImageBase64Tool();
+  }
+
+  if (typeof modules.initImageProcessTool === "function") {
+    modules.initImageProcessTool();
+  }
+
+  if (typeof modules.initAudioProcessTool === "function") {
+    modules.initAudioProcessTool();
   }
 
   if (typeof modules.initColorTool === "function") {

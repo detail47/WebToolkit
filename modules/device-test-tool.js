@@ -32,6 +32,7 @@ function initDeviceTestTool() {
   let isRecording = false;
   let recordedChunks = [];
   let recordedAudioUrl = "";
+  let speakerToneContext = null;
   const EMPTY_SHOT_SRC = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
   function syncMediaButtons() {
@@ -89,6 +90,26 @@ function initDeviceTestTool() {
       audioContext = null;
     }
     analyser = null;
+  }
+
+  function closeSpeakerToneContext() {
+    if (speakerToneContext) {
+      speakerToneContext.close().catch(() => {});
+      speakerToneContext = null;
+    }
+  }
+
+  function getSpeakerToneContext() {
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) {
+      return null;
+    }
+
+    if (!speakerToneContext || speakerToneContext.state === "closed") {
+      speakerToneContext = new AudioContextCtor();
+    }
+
+    return speakerToneContext;
   }
 
   function cleanupMediaResources() {
@@ -189,35 +210,48 @@ function initDeviceTestTool() {
   }
 
   async function playSpeakerTestTone() {
-    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextCtor) {
+    const ctx = getSpeakerToneContext();
+    if (!ctx) {
       notify("当前浏览器不支持扬声器测试。",);
       return;
     }
 
-    const ctx = new AudioContextCtor();
+    if (ctx.state === "suspended") {
+      await ctx.resume();
+    }
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const compressor = ctx.createDynamicsCompressor();
 
     osc.type = "sine";
     osc.frequency.value = 880;
     gain.gain.value = 0.0001;
 
+    compressor.threshold.setValueAtTime(-18, ctx.currentTime);
+    compressor.knee.setValueAtTime(20, ctx.currentTime);
+    compressor.ratio.setValueAtTime(8, ctx.currentTime);
+    compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+    compressor.release.setValueAtTime(0.2, ctx.currentTime);
+
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(compressor);
+    compressor.connect(ctx.destination);
 
     const now = ctx.currentTime;
-    gain.gain.exponentialRampToValueAtTime(0.15, now + 0.03);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.48);
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.82, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.56, now + 0.28);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.98);
 
     osc.start(now);
-    osc.stop(now + 0.5);
+    osc.stop(now + 1.0);
 
     await new Promise((resolve) => {
       osc.onended = resolve;
     });
 
-    await ctx.close();
     mediaStatus.textContent = "扬声器测试音播放完成。";
   }
 
@@ -358,6 +392,7 @@ function initDeviceTestTool() {
   downloadPhotoBtn.addEventListener("click", downloadPhoto);
 
   window.addEventListener("beforeunload", stopMedia);
+  window.addEventListener("beforeunload", closeSpeakerToneContext);
 
   syncMediaButtons();
 }

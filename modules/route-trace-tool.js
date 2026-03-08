@@ -129,84 +129,6 @@ async function checkSinglePort(hostname, port, timeoutMs) {
   }
 }
 
-async function runHttpHealth(url, method, timeoutMs) {
-  const start = performance.now();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      method,
-      cache: "no-store",
-      redirect: "follow",
-      signal: controller.signal
-    });
-
-    const spent = performance.now() - start;
-    const headers = [];
-    response.headers.forEach((value, key) => {
-      headers.push(`${key}: ${value}`);
-    });
-
-    return {
-      ok: true,
-      status: response.status,
-      statusText: response.statusText,
-      redirected: response.redirected,
-      finalUrl: response.url,
-      latency: spent,
-      headers
-    };
-  } catch (error) {
-    const timeout = error && error.name === "AbortError";
-    return {
-      ok: false,
-      message: timeout ? "请求超时" : (error.message || "请求失败")
-    };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function runCertificateCheck(url, timeoutMs) {
-  if (!window.isSecureContext || typeof fetch !== "function") {
-    throw new Error("当前环境不支持证书检测。");
-  }
-
-  const start = performance.now();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    await fetch(url, {
-      method: "HEAD",
-      cache: "no-store",
-      signal: controller.signal
-    });
-    const spent = performance.now() - start;
-
-    const security = typeof window.getSecurityInfo === "function" ? window.getSecurityInfo(url) : null;
-    if (security && security.validTo) {
-      const expiry = new Date(security.validTo);
-      const daysLeft = Math.floor((expiry.getTime() - Date.now()) / (24 * 3600 * 1000));
-      return {
-        supported: true,
-        text: `证书到期时间: ${expiry.toLocaleString()}\n剩余天数: ${daysLeft} 天\n检测耗时: ${formatMs(spent)}`
-      };
-    }
-
-    return {
-      supported: false,
-      text: `浏览器未提供证书到期日期接口。\n目标连接成功，TLS 握手正常。\n检测耗时: ${formatMs(spent)}\n建议使用系统命令进一步检查: openssl s_client -connect <host>:443`
-    };
-  } catch (error) {
-    const timeout = error && error.name === "AbortError";
-    throw new Error(timeout ? "证书检测超时" : (error.message || "证书检测失败"));
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function fetchPublicIpInfo() {
   const providers = [
     "https://api64.ipify.org?format=json",
@@ -262,14 +184,11 @@ function initRouteTraceTool() {
   const pingTimeoutInput = document.getElementById("ping-timeout-input");
   const dnsTypeInput = document.getElementById("dns-type-input");
   const portListInput = document.getElementById("port-list-input");
-  const httpMethodInput = document.getElementById("http-method-input");
 
   const runPingBtn = document.getElementById("run-ping-btn");
   const runTracertBtn = document.getElementById("run-tracert-btn");
   const runDnsBtn = document.getElementById("run-dns-btn");
   const runPortCheckBtn = document.getElementById("run-port-check-btn");
-  const runHttpHealthBtn = document.getElementById("run-http-health-btn");
-  const runCertCheckBtn = document.getElementById("run-cert-check-btn");
   const runPublicIpBtn = document.getElementById("run-public-ip-btn");
 
   const summary = document.getElementById("route-trace-summary");
@@ -397,53 +316,6 @@ function initRouteTraceTool() {
     output.value = checks.map((item) => `:${item.port} -> ${item.ok ? "可访问" : "失败"} (${item.note}, ${formatMs(item.latency)})`).join("\n");
   }
 
-  async function runHttpHealthCheck() {
-    const url = getTargetUrlOrNotify();
-    if (!url) {
-      return;
-    }
-
-    const timeoutMs = getTimeoutMs();
-    const method = httpMethodInput.value;
-
-    summary.value = `HTTP 健康检查中: ${method} ${url.href}`;
-    output.value = "检查中...";
-
-    const result = await runHttpHealth(url.href, method, timeoutMs);
-    if (!result.ok) {
-      summary.value = "HTTP 健康检查失败";
-      output.value = result.message;
-      return;
-    }
-
-    summary.value = `HTTP ${result.status} ${result.statusText}，耗时 ${formatMs(result.latency)}`;
-    output.value = [
-      `Final URL: ${result.finalUrl}`,
-      `Redirected: ${result.redirected ? "是" : "否"}`,
-      "--- Headers ---",
-      ...(result.headers.length ? result.headers : ["(无可读响应头)"])
-    ].join("\n");
-  }
-
-  async function runCertCheck() {
-    const url = getTargetUrlOrNotify();
-    if (!url) {
-      return;
-    }
-
-    const timeoutMs = getTimeoutMs();
-    summary.value = `证书到期检查中: ${url.hostname}`;
-
-    try {
-      const result = await runCertificateCheck(url.href, timeoutMs);
-      summary.value = result.supported ? "证书检查完成" : "证书检查完成（受浏览器限制）";
-      output.value = result.text;
-    } catch (error) {
-      summary.value = "证书检查失败";
-      output.value = String(error.message || error);
-    }
-  }
-
   async function runPublicIpAndNetworkInfo() {
     summary.value = "获取公网 IP 与网络信息中...";
 
@@ -479,18 +351,6 @@ function initRouteTraceTool() {
   runPortCheckBtn.addEventListener("click", () => {
     runPortCheck().catch((error) => {
       summary.value = "端口连通性检测异常";
-      output.value = String(error.message || error);
-    });
-  });
-  runHttpHealthBtn.addEventListener("click", () => {
-    runHttpHealthCheck().catch((error) => {
-      summary.value = "HTTP 健康检查异常";
-      output.value = String(error.message || error);
-    });
-  });
-  runCertCheckBtn.addEventListener("click", () => {
-    runCertCheck().catch((error) => {
-      summary.value = "证书检查异常";
       output.value = String(error.message || error);
     });
   });
