@@ -12,27 +12,35 @@
 
   <main class="app">
     <header class="hero">
-      <div class="theme-switcher" role="group" aria-label="主题模式切换">
-        <button id="theme-auto-btn" type="button" class="theme-btn" data-theme-mode="auto">自动</button>
-        <button id="theme-light-btn" type="button" class="theme-btn" data-theme-mode="light">白天</button>
-        <button id="theme-dark-btn" type="button" class="theme-btn" data-theme-mode="dark">黑夜</button>
+      <div class="hero-controls">
+        <button id="sidebar-toggle-btn" type="button" class="sidebar-toggle-btn" aria-controls="sidebar-nav" aria-expanded="true">隐藏导航</button>
+        <div class="theme-switcher" role="group" aria-label="主题模式切换">
+          <button id="theme-auto-btn" type="button" class="theme-btn" data-theme-mode="auto">自动</button>
+          <button id="theme-light-btn" type="button" class="theme-btn" data-theme-mode="light">白天</button>
+          <button id="theme-dark-btn" type="button" class="theme-btn" data-theme-mode="dark">黑夜</button>
+        </div>
       </div>
       <p class="eyebrow">Web Toolkit</p>
       <h1>小工具集合</h1>
-      <p class="subtitle">在一个页面中完成二维码生成与识别、哈希计算、SSH 密钥生成，以及更多常用工具操作。</p>
+      <p class="subtitle">一个页面，集成二维码、哈希、SSH 密钥、音视频处理、随机抽取等高频工具。</p>
     </header>
 
     <div class="workspace">
       <aside class="sidebar card" id="sidebar-nav">
         <h2>功能导航</h2>
         <div class="nav-group">
-          <p class="nav-group-title">文本与编码</p>
+          <p class="nav-group-title">识别与编码</p>
           <a class="nav-link active" href="#qr" data-page="qr">二维码工具</a>
-          <a class="nav-link" href="#hash" data-page="hash">哈希工具</a>
           <a class="nav-link" href="#encode" data-page="encode">编码转换</a>
-          <a class="nav-link" href="#uuid" data-page="uuid">UUID 生成</a>
-          <a class="nav-link" href="#password" data-page="password">密码生成器</a>
+          <a class="nav-link" href="#hash" data-page="hash">哈希工具</a>
           <a class="nav-link" href="#diff" data-page="diff">文本差异对比</a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-group-title">身份与安全</p>
+          <a class="nav-link" href="#password" data-page="password">密码生成器</a>
+          <a class="nav-link" href="#uuid" data-page="uuid">UUID 生成</a>
+          <a class="nav-link" href="#ssh" data-page="ssh">SSH 密钥</a>
         </div>
 
         <div class="nav-group">
@@ -41,22 +49,22 @@
           <a class="nav-link" href="#countdown" data-page="countdown">倒计时</a>
           <a class="nav-link" href="#timestamp" data-page="timestamp">时间戳转换</a>
           <a class="nav-link" href="#cron" data-page="cron">Cron 生成器</a>
+          <a class="nav-link" href="#random-picker" data-page="random-picker">随机抽取</a>
           <a class="nav-link" href="#calculator" data-page="calculator">计算器</a>
           <a class="nav-link" href="#bmi" data-page="bmi">BMI 计算器</a>
           <a class="nav-link" href="#unit-converter" data-page="unit-converter">单位转换器</a>
         </div>
 
         <div class="nav-group">
-          <p class="nav-group-title">图像与颜色</p>
+          <p class="nav-group-title">媒体与设计</p>
           <a class="nav-link" href="#image-base64" data-page="image-base64">图片 Base64</a>
           <a class="nav-link" href="#image-process" data-page="image-process">图片处理</a>
-          <a class="nav-link" href="#audio-process" data-page="audio-process">音频转换</a>
+          <a class="nav-link" href="#audio-process" data-page="audio-process">音频处理</a>
           <a class="nav-link" href="#color" data-page="color">颜色转换</a>
         </div>
 
         <div class="nav-group">
-          <p class="nav-group-title">系统与网络</p>
-          <a class="nav-link" href="#ssh" data-page="ssh">SSH 密钥</a>
+          <p class="nav-group-title">系统检测</p>
           <a class="nav-link" href="#route-trace" data-page="route-trace">网络测试</a>
           <a class="nav-link" href="#input-test" data-page="input-test">键盘鼠标测试</a>
           <a class="nav-link" href="#media-test" data-page="media-test">音视频设备测试</a>
@@ -634,11 +642,11 @@
     </section>
 
     <section class="card reveal tool-page" id="audio-process-card" data-page="audio-process">
-      <h2>音频转换工具</h2>
+      <h2>音频处理工具</h2>
       <div class="grid two-col">
         <div class="panel">
-          <label for="audio-process-input">上传音频</label>
-          <input id="audio-process-input" type="file" accept="audio/*" />
+          <label for="audio-process-input">上传音频（支持多选）</label>
+          <input id="audio-process-input" type="file" accept="audio/*" multiple />
 
           <label for="audio-process-format">输出格式</label>
           <select id="audio-process-format">
@@ -678,6 +686,146 @@
             <option value="stereo">双声道</option>
           </select>
 
+          <label>音频裁剪</label>
+          <div class="cron-grid image-process-two-col-grid">
+            <div>
+              <label for="audio-process-trim-start">开始时间 (秒)</label>
+              <input id="audio-process-trim-start" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div>
+              <label for="audio-process-trim-end">结束时间 (秒，留空=到结尾)</label>
+              <input id="audio-process-trim-end" type="number" min="0" step="0.01" placeholder="可留空" />
+            </div>
+          </div>
+
+          <label class="diff-toggle" for="audio-process-normalize-enable">
+            <input id="audio-process-normalize-enable" type="checkbox" />
+            <span class="diff-toggle-slider" aria-hidden="true"></span>
+            <span>音量标准化</span>
+          </label>
+          <div id="audio-process-normalize-wrap" class="cron-grid image-process-two-col-grid is-hidden">
+            <div>
+              <label for="audio-process-normalize-target-db">目标峰值 (dBFS)</label>
+              <input id="audio-process-normalize-target-db" type="number" min="-24" max="-0.1" step="0.1" value="-1" />
+            </div>
+          </div>
+
+          <label class="diff-toggle" for="audio-process-silence-enable">
+            <input id="audio-process-silence-enable" type="checkbox" />
+            <span class="diff-toggle-slider" aria-hidden="true"></span>
+            <span>静音检测与删除</span>
+          </label>
+          <div id="audio-process-silence-wrap" class="cron-grid image-process-two-col-grid is-hidden">
+            <div>
+              <label for="audio-process-silence-threshold-db">静音阈值 (dB)</label>
+              <input id="audio-process-silence-threshold-db" type="number" min="-80" max="-10" step="1" value="-45" />
+            </div>
+            <div>
+              <label for="audio-process-silence-min-ms">最小静音时长 (ms)</label>
+              <input id="audio-process-silence-min-ms" type="number" min="50" max="5000" step="10" value="300" />
+            </div>
+          </div>
+
+          <label>处理链</label>
+          <div class="cron-grid image-process-two-col-grid">
+            <div>
+              <label for="audio-process-fade-in-ms">淡入 (ms)</label>
+              <input id="audio-process-fade-in-ms" type="number" min="0" max="10000" step="10" value="0" />
+            </div>
+            <div>
+              <label for="audio-process-fade-out-ms">淡出 (ms)</label>
+              <input id="audio-process-fade-out-ms" type="number" min="0" max="10000" step="10" value="0" />
+            </div>
+            <div class="audio-process-filter-type-row">
+              <label for="audio-process-filter-type">滤波类型</label>
+              <select id="audio-process-filter-type">
+                <option value="off" selected>关闭</option>
+                <option value="lowpass">低通</option>
+                <option value="highpass">高通</option>
+                <option value="bandpass">带通</option>
+                <option value="notch">带阻</option>
+                <option value="custom">自定义（文本模式）</option>
+              </select>
+            </div>
+            <div id="audio-process-band-wrap" class="audio-process-filter-band-row">
+              <div class="image-process-scale-percent-row">
+                <label for="audio-process-band-min-slider">滤波频段 (20-20000Hz, 对数)</label>
+                <span id="audio-process-band-value" class="image-process-scale-percent-value">20 Hz - 20k Hz</span>
+              </div>
+              <div id="audio-process-band-visual-wrap" class="audio-process-filter-visual-wrap">
+                <div id="audio-process-band-slider-wrap" class="audio-process-band-slider-wrap">
+                  <div class="audio-process-band-track"></div>
+                  <div id="audio-process-band-range-left" class="audio-process-band-range is-hidden"></div>
+                  <div id="audio-process-band-range" class="audio-process-band-range"></div>
+                  <div id="audio-process-band-range-right" class="audio-process-band-range is-hidden"></div>
+                  <input id="audio-process-band-min-slider" type="range" min="0" max="1000" step="1" value="333" />
+                  <input id="audio-process-band-max-slider" type="range" min="0" max="1000" step="1" value="900" />
+                </div>
+                <div id="audio-process-band-marks" class="audio-process-log-marks">
+                  <span class="mark-edge-left" style="--mark-pos:0" data-hz="20"><b>20</b></span>
+                  <span style="--mark-pos:23.3" data-hz="100"><b>100</b></span>
+                  <span style="--mark-pos:33.3" data-hz="200"><b>200</b></span>
+                  <span style="--mark-pos:56.6" data-hz="1000"><b>1k</b></span>
+                  <span style="--mark-pos:66.7" data-hz="2000"><b>2k</b></span>
+                  <span style="--mark-pos:89.9" data-hz="10000"><b>10k</b></span>
+                  <span class="mark-edge-right" style="--mark-pos:100" data-hz="20000"><b>20k</b></span>
+                </div>
+              </div>
+              <div id="audio-process-band-text-wrap" class="is-hidden audio-process-band-text-inline">
+                <label for="audio-process-filter-freq-a-hz">A (Hz, 0=关闭)</label>
+                <input id="audio-process-filter-freq-a-hz" type="number" min="0" max="20000" step="1" value="200" />
+                <label for="audio-process-filter-freq-b-hz">B (Hz, 0=关闭)</label>
+                <input id="audio-process-filter-freq-b-hz" type="number" min="0" max="20000" step="1" value="10000" />
+              </div>
+            </div>
+          </div>
+
+          <label>变速 / 变调</label>
+          <div class="cron-grid image-process-two-col-grid">
+            <div class="audio-process-time-pitch-type-row">
+              <label for="audio-process-time-pitch-mode">模式</label>
+              <select id="audio-process-time-pitch-mode">
+                <option value="off" selected>关闭</option>
+                <option value="speed-preserve-pitch">变速不变调</option>
+                <option value="pitch-preserve-speed">变调不变速</option>
+                <option value="custom">自定义（同时设置变速+变调）</option>
+              </select>
+            </div>
+            <div id="audio-process-time-pitch-controls-wrap" class="audio-process-time-pitch-controls-row">
+              <div class="cron-grid image-process-two-col-grid">
+                <div id="audio-process-speed-wrap">
+                  <label for="audio-process-speed-percent">速度 (%)</label>
+                  <input id="audio-process-speed-percent" type="number" min="50" max="200" step="1" value="100" />
+                </div>
+                <div id="audio-process-pitch-wrap" class="is-hidden">
+                  <label for="audio-process-pitch-semitone">音高 (半音)</label>
+                  <input id="audio-process-pitch-semitone" type="number" min="-12" max="12" step="1" value="0" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="hint" id="audio-process-time-pitch-note">正式功能：导出时生效。</p>
+
+          <label>元数据编辑（WAV 支持写入 INFO）</label>
+          <div class="cron-grid image-process-two-col-grid">
+            <div>
+              <label for="audio-process-meta-title">标题</label>
+              <input id="audio-process-meta-title" type="text" placeholder="可留空" />
+            </div>
+            <div>
+              <label for="audio-process-meta-artist">作者</label>
+              <input id="audio-process-meta-artist" type="text" placeholder="可留空" />
+            </div>
+            <div>
+              <label for="audio-process-meta-album">专辑</label>
+              <input id="audio-process-meta-album" type="text" placeholder="可留空" />
+            </div>
+            <div>
+              <label for="audio-process-meta-comment">备注</label>
+              <input id="audio-process-meta-comment" type="text" placeholder="可留空" />
+            </div>
+          </div>
+
           <div class="image-process-scale-percent-row">
             <label for="audio-process-gain">音量增益</label>
             <span id="audio-process-gain-value" class="image-process-scale-percent-value">100%</span>
@@ -685,9 +833,12 @@
           <input id="audio-process-gain" type="range" min="50" max="200" step="1" value="100" />
 
           <div class="button-row">
-            <button id="audio-process-run-btn" type="button">转换音频</button>
+            <button id="audio-process-run-btn" type="button">转换当前文件</button>
+            <button id="audio-process-run-batch-btn" type="button" class="secondary">批量转换全部</button>
+            <button id="audio-process-stop-batch-btn" type="button" class="secondary" disabled>停止批量</button>
             <button id="audio-process-reset-btn" type="button" class="secondary">清空结果</button>
           </div>
+          <p id="audio-process-ffmpeg-status" class="hint" aria-live="polite">ffmpeg.wasm: 未加载（按需）</p>
         </div>
 
         <div class="panel">
@@ -695,17 +846,28 @@
           <div class="image-process-preview-grid">
             <div class="image-process-preview-col">
               <p class="hint">原音频</p>
+              <canvas id="audio-process-source-waveform" height="84"></canvas>
               <audio id="audio-process-source-preview" controls></audio>
             </div>
             <div class="image-process-preview-col">
               <p class="hint">转换后</p>
+              <canvas id="audio-process-result-waveform" height="84"></canvas>
               <audio id="audio-process-result-preview" controls></audio>
             </div>
           </div>
 
+          <div class="button-row audio-process-ab-row">
+            <button id="audio-process-ab-source-btn" type="button" class="secondary">原音试听</button>
+            <button id="audio-process-ab-result-btn" type="button" class="secondary">转换后试听</button>
+            <button id="audio-process-ab-pause-btn" type="button" class="secondary">暂停</button>
+          </div>
+
           <label for="audio-process-info">处理信息</label>
           <textarea id="audio-process-info" rows="8" readonly></textarea>
-          <button id="audio-process-download-btn" class="secondary" type="button" disabled>下载处理结果</button>
+          <div class="button-row">
+            <button id="audio-process-download-btn" class="secondary" type="button" disabled>下载当前结果</button>
+            <button id="audio-process-download-all-btn" class="secondary" type="button" disabled>下载全部结果</button>
+          </div>
         </div>
       </div>
     </section>
@@ -770,6 +932,104 @@
             </div>
             <button id="copy-color-cmyk-btn" class="secondary color-copy-btn">复制</button>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="random-picker-card" data-page="random-picker">
+      <h2>随机抽取</h2>
+      <div class="grid two-col">
+        <div class="panel">
+          <label for="random-picker-mode">抽取模式</label>
+          <select id="random-picker-mode">
+            <option value="number" selected>数字范围</option>
+            <option value="list">名单（支持权重）</option>
+          </select>
+
+          <div id="random-picker-number-wrap" class="cron-grid image-process-two-col-grid">
+            <div>
+              <label for="random-picker-number-kind">数值类型</label>
+              <select id="random-picker-number-kind">
+                <option value="integer" selected>整数</option>
+                <option value="decimal">小数</option>
+              </select>
+            </div>
+            <div id="random-picker-number-decimals-wrap" class="is-hidden">
+              <label for="random-picker-number-decimals">小数位数</label>
+              <input id="random-picker-number-decimals" type="number" min="1" max="8" step="1" value="4" />
+            </div>
+            <div>
+              <label for="random-picker-number-min">最小值</label>
+              <input id="random-picker-number-min" type="number" step="1" value="1" />
+            </div>
+            <div>
+              <label for="random-picker-number-max">最大值</label>
+              <input id="random-picker-number-max" type="number" step="1" value="100" />
+            </div>
+            <div>
+              <label for="random-picker-number-count">抽取数量</label>
+              <input id="random-picker-number-count" type="number" min="1" step="1" value="1" />
+            </div>
+            <div>
+              <label class="image-process-inline-check" for="random-picker-number-unique">
+                <input id="random-picker-number-unique" type="checkbox" checked />
+                <span>不重复抽取</span>
+              </label>
+            </div>
+            <div>
+              <label class="image-process-inline-check" for="random-picker-number-include-min">
+                <input id="random-picker-number-include-min" type="checkbox" checked />
+                <span>包含最小值（左闭）</span>
+              </label>
+            </div>
+            <div>
+              <label class="image-process-inline-check" for="random-picker-number-include-max">
+                <input id="random-picker-number-include-max" type="checkbox" checked />
+                <span>包含最大值（右闭）</span>
+              </label>
+            </div>
+            <div class="button-row random-picker-preset-row">
+              <button type="button" class="secondary" data-random-number-preset="int-1-100">整数 1-100</button>
+              <button type="button" class="secondary" data-random-number-preset="dec-0-1-open">小数 0-1</button>
+            </div>
+          </div>
+
+          <div id="random-picker-list-wrap" class="is-hidden">
+            <label for="random-picker-file">上传名单文件（TXT / CSV）</label>
+            <input id="random-picker-file" type="file" accept=".txt,.csv,.tsv,text/plain,text/csv" />
+
+            <label for="random-picker-text">名单内容（每行一条，可带权重）</label>
+            <textarea id="random-picker-text" rows="8" placeholder="示例:\n张三 10\n李四 50\n王五 10000\n\n也支持 CSV: 张三,10"></textarea>
+
+            <div class="cron-grid image-process-two-col-grid">
+              <div>
+                <label for="random-picker-list-count">抽取数量</label>
+                <input id="random-picker-list-count" type="number" min="1" step="1" value="1" />
+              </div>
+              <div>
+                <label class="image-process-inline-check" for="random-picker-list-unique">
+                  <input id="random-picker-list-unique" type="checkbox" checked />
+                  <span>不重复抽取</span>
+                </label>
+              </div>
+            </div>
+
+            <p class="hint" id="random-picker-list-summary">名单统计: 0 条</p>
+          </div>
+
+          <div class="button-row">
+            <button id="random-picker-draw-btn" type="button">开始抽取</button>
+            <button id="random-picker-clear-btn" type="button" class="secondary">清空结果</button>
+            <button id="random-picker-copy-btn" type="button" class="secondary">复制结果</button>
+            <button id="random-picker-export-csv-btn" type="button" class="secondary">保存记录</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <label for="random-picker-info">抽取信息</label>
+          <textarea id="random-picker-info" rows="7" readonly></textarea>
+          <label for="random-picker-result-list">抽取结果</label>
+          <ol id="random-picker-result-list" class="random-picker-result-list" aria-live="polite"></ol>
         </div>
       </div>
     </section>
@@ -1099,6 +1359,7 @@
   <script src="modules/diff-tool.js"></script>
   <script src="modules/route-trace-tool.js"></script>
   <script src="modules/calculator-tool.js"></script>
+  <script src="modules/random-picker-tool.js"></script>
   <script src="modules/device-test-tool.js"></script>
   <script src="modules/page-nav-tool.js"></script>
   <script src="app.js"></script>

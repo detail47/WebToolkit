@@ -1,6 +1,34 @@
 function initPageNavTool() {
   const links = Array.from(document.querySelectorAll("#sidebar-nav .nav-link"));
   const pages = Array.from(document.querySelectorAll(".tool-page"));
+  const workspace = document.querySelector(".workspace");
+  const sidebarToggleBtn = document.querySelector("#sidebar-toggle-btn");
+
+  const SIDEBAR_COLLAPSE_KEY = "webtool.sidebarCollapsed";
+
+  function setSidebarCollapsed(collapsed) {
+    if (!workspace) return;
+    workspace.classList.toggle("sidebar-collapsed", collapsed);
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.textContent = collapsed ? "显示导航" : "隐藏导航";
+      sidebarToggleBtn.setAttribute("aria-expanded", String(!collapsed));
+    }
+  }
+
+  function restoreSidebarState() {
+    if (!workspace) return;
+    const collapsed = window.localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === "1";
+    setSidebarCollapsed(collapsed);
+  }
+
+  function bindSidebarToggle() {
+    if (!sidebarToggleBtn || !workspace) return;
+    sidebarToggleBtn.addEventListener("click", () => {
+      const collapsed = !workspace.classList.contains("sidebar-collapsed");
+      setSidebarCollapsed(collapsed);
+      window.localStorage.setItem(SIDEBAR_COLLAPSE_KEY, collapsed ? "1" : "0");
+    });
+  }
 
   if (!links.length || !pages.length) {
     return;
@@ -43,6 +71,8 @@ function initPageNavTool() {
     activatePage(parseHash());
   });
 
+  restoreSidebarState();
+  bindSidebarToggle();
   activatePage(parseHash());
 }
 

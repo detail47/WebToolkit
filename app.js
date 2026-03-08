@@ -77,6 +77,10 @@ function initApp() {
     modules.initCalculatorTool();
   }
 
+  if (typeof modules.initRandomPickerTool === "function") {
+    modules.initRandomPickerTool();
+  }
+
   if (typeof modules.initDeviceTestTool === "function") {
     modules.initDeviceTestTool();
   }
