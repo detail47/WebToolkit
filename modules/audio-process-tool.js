@@ -928,6 +928,14 @@ function initAudioProcessTool() {
   let resultItems = [];
   let activeResultUrl = "";
   let customDerivedMode = "custom";
+  let singleModeCutoffHz = {
+    highpass: 200,
+    lowpass: 10000
+  };
+  let dualModeRangeHz = {
+    bandpass: [200, 10000],
+    notch: [200, 10000]
+  };
   let batchAbortRequested = false;
   let batchRunning = false;
 
@@ -1145,10 +1153,41 @@ function initAudioProcessTool() {
     }
 
     if (singleSliderMode) {
-      bandMaxSliderInput.value = bandMinSliderInput.value;
+      const fallbackHz = mode === "lowpass" ? 10000 : 200;
+      const storedHz = clamp(Number.parseFloat(singleModeCutoffHz[mode]) || fallbackHz, FILTER_MIN_HZ, FILTER_MAX_HZ);
+      filterFreqAHzInput.value = String(storedHz);
+      filterFreqBHzInput.value = String(storedHz);
+    } else if (mode === "bandpass" || mode === "notch") {
+      const stored = dualModeRangeHz[mode] || [200, 10000];
+      const lowHz = clamp(Number.parseFloat(stored[0]) || 200, FILTER_MIN_HZ, FILTER_MAX_HZ);
+      const highHz = clamp(Number.parseFloat(stored[1]) || 10000, FILTER_MIN_HZ, FILTER_MAX_HZ);
+      filterFreqAHzInput.value = String(Math.min(lowHz, highHz));
+      filterFreqBHzInput.value = String(Math.max(lowHz, highHz));
     }
 
     syncFilterVisualFromText();
+
+    if (singleSliderMode) {
+      // Collapse to one cutoff in single-slider modes to avoid hidden slider drift.
+      const singleRaw = mode === "lowpass"
+        ? clamp(Number.parseFloat(bandMaxSliderInput.value) || 0, 0, FILTER_SLIDER_MAX)
+        : clamp(Number.parseFloat(bandMinSliderInput.value) || 0, 0, FILTER_SLIDER_MAX);
+      bandMinSliderInput.value = String(singleRaw);
+      bandMaxSliderInput.value = String(singleRaw);
+      singleModeCutoffHz[mode] = logSliderValueToHz(singleRaw);
+    } else if (mode === "bandpass" || mode === "notch") {
+      const lowHz = Math.min(
+        logSliderValueToHz(bandMinSliderInput.value),
+        logSliderValueToHz(bandMaxSliderInput.value)
+      );
+      const highHz = Math.max(
+        logSliderValueToHz(bandMinSliderInput.value),
+        logSliderValueToHz(bandMaxSliderInput.value)
+      );
+      dualModeRangeHz[mode] = [lowHz, highHz];
+    }
+
+    syncFilterVisualLabels();
     syncFilterTextFromVisual();
   }
 
@@ -1438,6 +1477,58 @@ function initAudioProcessTool() {
     return detected.key;
   }
 
+  function getTimeStretchFactor(options) {
+    if (!options) return 1;
+    if (options.timePitchMode === "speed-preserve-pitch" || options.timePitchMode === "custom") {
+      return clamp((Number.parseFloat(options.speedPercent) || 100) / 100, 0.5, 2);
+    }
+    return 1;
+  }
+
+  function mapSourceTimeToResultTime(sourceTime, syncContext, resultDuration) {
+    if (!syncContext) {
+      return Math.max(0, Number.parseFloat(sourceTime) || 0);
+    }
+
+    const srcTime = Math.max(0, Number.parseFloat(sourceTime) || 0);
+    const trimStart = Math.max(0, Number.parseFloat(syncContext.trimStart) || 0);
+    const trimEnd = syncContext.trimEnd > 0
+      ? Number.parseFloat(syncContext.trimEnd)
+      : Number.parseFloat(syncContext.sourceDuration);
+    const speedFactor = getTimeStretchFactor(syncContext);
+
+    const clampedSource = Number.isFinite(trimEnd)
+      ? clamp(srcTime, trimStart, trimEnd)
+      : Math.max(trimStart, srcTime);
+    const trimmedTime = Math.max(0, clampedSource - trimStart);
+    const mapped = trimmedTime / Math.max(0.0001, speedFactor);
+
+    if (!Number.isFinite(resultDuration) || resultDuration <= 0) {
+      return mapped;
+    }
+    return clamp(mapped, 0, resultDuration);
+  }
+
+  function mapResultTimeToSourceTime(resultTime, syncContext, sourceDuration) {
+    if (!syncContext) {
+      return Math.max(0, Number.parseFloat(resultTime) || 0);
+    }
+
+    const dstTime = Math.max(0, Number.parseFloat(resultTime) || 0);
+    const trimStart = Math.max(0, Number.parseFloat(syncContext.trimStart) || 0);
+    const trimEnd = syncContext.trimEnd > 0
+      ? Number.parseFloat(syncContext.trimEnd)
+      : Number.parseFloat(syncContext.sourceDuration);
+    const speedFactor = getTimeStretchFactor(syncContext);
+
+    const mapped = trimStart + dstTime * speedFactor;
+    const maxSource = Number.isFinite(trimEnd)
+      ? trimEnd
+      : (Number.isFinite(sourceDuration) && sourceDuration > 0 ? sourceDuration : mapped);
+
+    return clamp(mapped, trimStart, maxSource);
+  }
+
   async function processOneFile(file, options) {
     const arrayBuffer = await readAudioFileAsArrayBuffer(file);
     const decoded = await decodeAudioBuffer(arrayBuffer);
@@ -1526,48 +1617,21 @@ function initAudioProcessTool() {
       formatKey: requestedFormatKey,
       mime: outputMime,
       formatProfile,
-      encodeEngine
+      encodeEngine,
+      previewSync: {
+        sourceDuration: decoded.duration,
+        trimStart: options.trimStart,
+        trimEnd: options.trimEnd,
+        timePitchMode: options.timePitchMode,
+        speedPercent: options.speedPercent
+      }
     };
-  }
-
-  function applyPreviewTimePitch(audioElement) {
-    const mode = timePitchModeInput.value;
-    const speed = clamp(Number.parseFloat(speedPercentInput.value) || 100, 50, 200) / 100;
-    const pitch = clamp(Number.parseFloat(pitchSemitoneInput.value) || 0, -12, 12);
-    const pitchFactor = Math.pow(2, pitch / 12);
-
-    function setPreservePitch(target, enabled) {
-      if (typeof target.preservesPitch === "boolean") target.preservesPitch = enabled;
-      if (typeof target.mozPreservesPitch === "boolean") target.mozPreservesPitch = enabled;
-      if (typeof target.webkitPreservesPitch === "boolean") target.webkitPreservesPitch = enabled;
-    }
-
-    audioElement.playbackRate = 1;
-    setPreservePitch(audioElement, true);
-
-    if (mode === "speed-preserve-pitch") {
-      audioElement.playbackRate = speed;
-      setPreservePitch(audioElement, true);
-      return;
-    }
-
-    if (mode === "pitch-preserve-speed") {
-      setPreservePitch(audioElement, false);
-      audioElement.playbackRate = pitchFactor;
-      return;
-    }
-
-    if (mode === "custom") {
-      setPreservePitch(audioElement, false);
-      audioElement.playbackRate = clamp(speed * pitchFactor, 0.5, 4);
-    }
   }
 
   function applyResultToUI(result, isBatchSummary) {
     revokeActiveResultUrl();
     activeResultUrl = result.url;
     resultPreview.src = result.url;
-    applyPreviewTimePitch(resultPreview);
 
     drawWaveform(resultWaveform, result.rendered);
 
@@ -1621,7 +1685,6 @@ function initAudioProcessTool() {
     revokeSourcePreviewUrl();
     sourcePreviewUrl = URL.createObjectURL(sourceFile);
     sourcePreview.src = sourcePreviewUrl;
-    applyPreviewTimePitch(sourcePreview);
 
     const buf = await readAudioFileAsArrayBuffer(sourceFile);
     sourceBuffer = await decodeAudioBuffer(buf);
@@ -1746,10 +1809,15 @@ function initAudioProcessTool() {
 
   function playA() {
     if (!sourcePreview.src) return;
-    if (resultPreview.currentTime > 0 && Number.isFinite(resultPreview.currentTime)) {
-      sourcePreview.currentTime = resultPreview.currentTime;
+    if (resultItems.length && resultPreview.currentTime > 0 && Number.isFinite(resultPreview.currentTime)) {
+      const syncContext = resultItems[0].previewSync;
+      const mapped = mapResultTimeToSourceTime(
+        resultPreview.currentTime,
+        syncContext,
+        sourcePreview.duration
+      );
+      sourcePreview.currentTime = mapped;
     }
-    applyPreviewTimePitch(sourcePreview);
     resultPreview.pause();
     sourcePreview.play().catch(() => {});
   }
@@ -1760,9 +1828,14 @@ function initAudioProcessTool() {
       return;
     }
     if (sourcePreview.currentTime > 0 && Number.isFinite(sourcePreview.currentTime)) {
-      resultPreview.currentTime = sourcePreview.currentTime;
+      const syncContext = resultItems[0].previewSync;
+      const mapped = mapSourceTimeToResultTime(
+        sourcePreview.currentTime,
+        syncContext,
+        resultPreview.duration
+      );
+      resultPreview.currentTime = mapped;
     }
-    applyPreviewTimePitch(resultPreview);
     sourcePreview.pause();
     resultPreview.play().catch(() => {});
   }
@@ -1794,12 +1867,38 @@ function initAudioProcessTool() {
     normalizeBandSliderOrder("min");
     syncFilterVisualLabels();
     syncFilterTextFromVisual();
+    if (filterTypeInput.value === "highpass" || filterTypeInput.value === "lowpass") {
+      singleModeCutoffHz[filterTypeInput.value] = Math.max(0, Number.parseFloat(filterFreqAHzInput.value) || 0);
+    } else if (filterTypeInput.value === "bandpass" || filterTypeInput.value === "notch") {
+      const lowHz = Math.min(
+        Math.max(0, Number.parseFloat(filterFreqAHzInput.value) || 0),
+        Math.max(0, Number.parseFloat(filterFreqBHzInput.value) || 0)
+      );
+      const highHz = Math.max(
+        Math.max(0, Number.parseFloat(filterFreqAHzInput.value) || 0),
+        Math.max(0, Number.parseFloat(filterFreqBHzInput.value) || 0)
+      );
+      dualModeRangeHz[filterTypeInput.value] = [lowHz, highHz];
+    }
   });
 
   bandMaxSliderInput.addEventListener("input", () => {
     normalizeBandSliderOrder("max");
     syncFilterVisualLabels();
     syncFilterTextFromVisual();
+    if (filterTypeInput.value === "highpass" || filterTypeInput.value === "lowpass") {
+      singleModeCutoffHz[filterTypeInput.value] = Math.max(0, Number.parseFloat(filterFreqAHzInput.value) || 0);
+    } else if (filterTypeInput.value === "bandpass" || filterTypeInput.value === "notch") {
+      const lowHz = Math.min(
+        Math.max(0, Number.parseFloat(filterFreqAHzInput.value) || 0),
+        Math.max(0, Number.parseFloat(filterFreqBHzInput.value) || 0)
+      );
+      const highHz = Math.max(
+        Math.max(0, Number.parseFloat(filterFreqAHzInput.value) || 0),
+        Math.max(0, Number.parseFloat(filterFreqBHzInput.value) || 0)
+      );
+      dualModeRangeHz[filterTypeInput.value] = [lowHz, highHz];
+    }
   });
 
   filterFreqAHzInput.addEventListener("input", () => {
@@ -1831,18 +1930,6 @@ function initAudioProcessTool() {
   timePitchModeInput.addEventListener("change", () => {
     updateTimePitchUI();
     updateTimePitchNote();
-    applyPreviewTimePitch(sourcePreview);
-    applyPreviewTimePitch(resultPreview);
-  });
-
-  speedPercentInput.addEventListener("input", () => {
-    applyPreviewTimePitch(sourcePreview);
-    applyPreviewTimePitch(resultPreview);
-  });
-
-  pitchSemitoneInput.addEventListener("input", () => {
-    applyPreviewTimePitch(sourcePreview);
-    applyPreviewTimePitch(resultPreview);
   });
 
   runBtn.addEventListener("click", () => {
@@ -1880,6 +1967,14 @@ function initAudioProcessTool() {
     filterTypeInput.value = "off";
     filterFreqAHzInput.value = "200";
     filterFreqBHzInput.value = "10000";
+    singleModeCutoffHz = {
+      highpass: 200,
+      lowpass: 10000
+    };
+    dualModeRangeHz = {
+      bandpass: [200, 10000],
+      notch: [200, 10000]
+    };
     syncFilterVisualFromText();
     syncFilterTextFromVisual();
     updateFilterModeUI();
@@ -1892,13 +1987,6 @@ function initAudioProcessTool() {
   abSourceBtn.addEventListener("click", playA);
   abResultBtn.addEventListener("click", playB);
   abPauseBtn.addEventListener("click", pausePreview);
-
-  sourcePreview.addEventListener("play", () => {
-    applyPreviewTimePitch(sourcePreview);
-  });
-  resultPreview.addEventListener("play", () => {
-    applyPreviewTimePitch(resultPreview);
-  });
 
   window.addEventListener("beforeunload", () => {
     revokeSourcePreviewUrl();
