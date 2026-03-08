@@ -196,9 +196,32 @@ body {
   display: block;
 }
 
+body.home-mode.sidebar-collapsed .app {
+  min-height: 100vh;
+  margin-top: 0;
+  margin-bottom: 0;
+  align-content: center;
+}
+
+body.home-mode .workspace {
+  display: grid;
+}
+
+body.home-mode.sidebar-collapsed .workspace {
+  display: none;
+}
+
+body.home-mode.sidebar-collapsed .hero {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
 .hero {
   position: relative;
   padding: 0.45rem 0.2rem 0.2rem;
+  text-align: left;
   animation: rise 0.7s ease-out both;
 }
 
@@ -277,6 +300,26 @@ h1 {
   color: var(--muted);
   max-width: 66ch;
   font-size: 0.92rem;
+}
+
+body.home-mode.sidebar-collapsed .subtitle {
+  margin: 0 auto;
+}
+
+.home-readme-box {
+  margin: 0;
+  min-height: 220px;
+  max-height: 58vh;
+  overflow: auto;
+  padding: 0.72rem;
+  border: 1px dashed rgba(40, 45, 58, 0.24);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+  font-size: 0.89rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .card {
@@ -1418,14 +1461,14 @@ button.secondary:hover {
   inset: 0;
   display: grid;
   place-items: center;
-  background: #ffffff;
-  color: #111111;
+  background: #000000;
+  color: #f4f7fb;
   z-index: 9999;
 }
 
 .time-fullscreen-view.fs-alt {
-  background: #000000;
-  color: #f4f7fb;
+  background: #ffffff;
+  color: #111111;
 }
 
 .time-fullscreen-clock {
@@ -1442,16 +1485,6 @@ button.secondary:hover {
 
 .time-fullscreen-view:not(:fullscreen) {
   display: none;
-}
-
-:root[data-theme="dark"] .time-fullscreen-view {
-  background: #000000;
-  color: #f4f7fb;
-}
-
-:root[data-theme="dark"] .time-fullscreen-view.fs-alt {
-  background: #ffffff;
-  color: #111111;
 }
 
 .calc-pad {

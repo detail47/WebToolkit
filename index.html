@@ -29,8 +29,13 @@
       <aside class="sidebar card" id="sidebar-nav">
         <h2>功能导航</h2>
         <div class="nav-group">
+          <p class="nav-group-title">主页</p>
+          <a class="nav-link active" href="#home" data-page="home">欢迎页</a>
+        </div>
+
+        <div class="nav-group">
           <p class="nav-group-title">识别与编码</p>
-          <a class="nav-link active" href="#qr" data-page="qr">二维码工具</a>
+          <a class="nav-link" href="#qr" data-page="qr">二维码工具</a>
           <a class="nav-link" href="#encode" data-page="encode">编码转换</a>
           <a class="nav-link" href="#hash" data-page="hash">哈希工具</a>
           <a class="nav-link" href="#diff" data-page="diff">文本差异对比</a>
@@ -73,7 +78,15 @@
 
       <div class="pages" id="tool-pages">
 
-    <section class="card reveal tool-page active" id="qr-card" data-page="qr">
+    <section class="card reveal tool-page active" id="home-card" data-page="home" aria-hidden="false">
+      <h2>欢迎页</h2>
+      <div class="panel">
+        <label for="home-readme-content">README</label>
+        <pre id="home-readme-content" class="home-readme-box">README 加载中...</pre>
+      </div>
+    </section>
+
+    <section class="card reveal tool-page" id="qr-card" data-page="qr">
       <h2>二维码生成与识别</h2>
       <div class="grid two-col">
         <div class="panel">
