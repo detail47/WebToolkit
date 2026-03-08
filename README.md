@@ -64,6 +64,29 @@ node dev-server.js
 
 该服务会自动返回 `COOP/COEP` 响应头，满足 `SharedArrayBuffer` 运行条件。
 
+### 部署到 Vercel（启用 ffmpeg.wasm）
+
+项目根目录已提供 `vercel.json`，会为全部静态资源返回以下响应头：
+
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Embedder-Policy: require-corp`
+- `Cross-Origin-Resource-Policy: same-origin`
+
+部署步骤：
+
+1. 将仓库导入 Vercel。
+2. Framework 选择 `Other`（或保持自动识别），无需构建命令。
+3. Output Directory 留空（根目录静态文件直接发布）。
+4. 部署后使用 HTTPS 域名访问（Vercel 默认提供 HTTPS）。
+
+验证方式（浏览器 DevTools -> Network）：
+
+- 任意页面请求响应头中应包含上面 3 个头。
+- 控制台应可看到 `crossOriginIsolated === true`。
+- 音频工具中的 `ffmpeg.wasm` 状态应为“已就绪”或“按需加载后可用”。
+
+注意：启用 `COEP: require-corp` 后，跨站资源（第三方脚本/媒体）若未正确设置 CORS 或 CORP，浏览器会拦截加载。当前项目依赖均为同源本地资源，不受影响。
+
 说明：部分浏览器在 `file://` 模式下会限制文件读取，欢迎页 README 可能无法加载，`ffmpeg.wasm` 也会因缺少隔离环境而不可用。若遇到该问题，请使用本地静态服务器打开。
 
 建议使用最新版 Chrome 或 Edge。
